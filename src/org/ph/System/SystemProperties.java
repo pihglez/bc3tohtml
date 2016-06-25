@@ -22,6 +22,7 @@ package org.ph.System;
  */
 public class SystemProperties {
     public final String javaVendor;
+    public final String javaVendorURL;
     public final String javaVersion;
     
     public final String fileSep;
@@ -35,8 +36,12 @@ public class SystemProperties {
     public final String userDir;
     public final String userHome;
     
+    public final SystemEnvironmentVariables envVars;
+    public final String                     envVarsString;
+    
     public SystemProperties() {
         javaVendor =    System.getProperty("java.vendor");
+        javaVendorURL = System.getProperty("java.vendor.url");
         javaVersion =   System.getProperty("java.version");
         
         fileSep =       System.getProperty("file.separator");
@@ -49,13 +54,22 @@ public class SystemProperties {
         userName =      System.getProperty("user.name");
         userDir =       System.getProperty("user.dir");
         userHome =      System.getProperty("user.home");
+        
+        envVars         =   new SystemEnvironmentVariables();
+        envVarsString   =   envVars.getAllEnvironmentVariables();
     }
     
     
     public String toConsoleString() {
         StringBuilder sb = new StringBuilder();
         
+        sb.append("Información del sistema: corriendo en entorno ");
+        sb.append(((oSName.toLowerCase().contains("win")) ? "Windows" : "*nix"));
+        sb.append(((oSName.toLowerCase().contains("mac")) ? " (mac OS)" : ""));
+        sb.append("\n\n");
+        
         sb.append("Vendedor de java: ");                sb.append(javaVendor);      sb.append("\n");
+        sb.append("URL del vendedor de java: ");        sb.append(javaVendorURL);   sb.append("\n");
         sb.append("Versión de java: ");                 sb.append(javaVersion);     sb.append("\n\n");
         sb.append("Sistema operativo: ");               sb.append(oSName);          sb.append("\n");
         sb.append("Arquitectura: ");                    sb.append(oSArch);          sb.append("\n");
@@ -66,6 +80,9 @@ public class SystemProperties {
         sb.append("Nombre de usuario: ");               sb.append(userName);        sb.append("\n");
         sb.append("Carpeta de actual de usuario: ");    sb.append(userDir);         sb.append("\n");
         sb.append("Carpeta raíz de usuario: ");         sb.append(userHome);        sb.append("\n");
+        
+        sb.append("\nListado de variables de entorno:\n"
+                + "");                                  sb.append(envVarsString);   sb.append("\n");
         
         return sb.toString();
     }

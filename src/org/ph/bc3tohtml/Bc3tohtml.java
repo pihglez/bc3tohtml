@@ -80,6 +80,16 @@ public class Bc3tohtml {
      * @throws ErrorInArgumentsException Error irrecuperable en la introducción de comandos por parte del usuario
      */
     private static void testArgs(String[] args) throws ErrorInArgumentsException {
+        // antes de comenzar con la ejecución, deberían procesarse antes todos los
+        // switches con el objetivo de saber, por ejemplo, si se emplea el modificador
+        // -y, el -l o el -v
+        LineaComandos.asumirRespuestaPositiva = lookForAnswerInArray(args, "-y");
+        LineaComandos.modoVerbose = lookForAnswerInArray(args, "-v");
+        
+        
+        // Hay determinadas opciones que únicamente se deberían poder ejecutar en el caso
+        // de que se introdujesen las opciones adecuadas por parte del usuario
+        
         String s;
         // <editor-fold defaultstate="expanded" desc=" COMMAND LINE SWITCHES SELECTION "> 
         for (int j = 0; j < args.length; j++) {
@@ -146,11 +156,18 @@ public class Bc3tohtml {
                         } else {
                             // otras opciones que se podrían considerar...
                             // sobreescribir el archivo, etc.
-                            if (!preguntarUsuarioSiNo("¿Sobreescribir el archivo " + nombreArchivoSalida + "?")) {
+                            if (!LineaComandos.asumirRespuestaPositiva) {
+                                    if (!preguntarUsuarioSiNo("¿Sobreescribir el archivo " + nombreArchivoSalida + "?")) {
+                                    LineaComandos.nombreArchivoSalida = nombreArchivoSalida;
+                                    LineaComandos.nombrarArchivoSalida = true;
+                                } else {
+                                        throw new ErrorInArgumentsException("El archivo " + nombreArchivoSalida + " falta o no es utilizable.");
+                                    }
+                            } else {
                                 LineaComandos.nombreArchivoSalida = nombreArchivoSalida;
                                 LineaComandos.nombrarArchivoSalida = true;
-                            } else
-                            throw new ErrorInArgumentsException("El archivo " + nombreArchivoSalida + " falta o no es utilizable.");
+                            }
+                            
                         }
                         
                     } else {
@@ -159,13 +176,17 @@ public class Bc3tohtml {
                         throw new ErrorInArgumentsException("El número de argumentos relacionados con el nombre de archivo de salida no es correcto.");
                     }
                     break;
-                case "-v":  // modo verbose... se muestran en pantalla todos los pasos... :-P
-                    LineaComandos.modoVerbose = true;
-                    break;
-                case "-y":
-                    LineaComandos.asumirRespuestaPositiva = true;
-                    break;
+//                case "-v":  // modo verbose... se muestran en pantalla todos los pasos... :-P
+//                    LineaComandos.modoVerbose = true;
+//                    break;
+//                case "-y":
+//                    LineaComandos.asumirRespuestaPositiva = true;
+//                    break;
                 
+                case "-z":
+                    Bc3ToHtmlLicense lic = new Bc3ToHtmlLicense();
+                    System.out.println(lic.getLICENSE());
+                    break;
                 default:    // se procesa todo lo que explícitamente no entre dentro de uno de los casos previstos
                     switch (args.length) {
                         case 1:
@@ -238,5 +259,23 @@ public class Bc3tohtml {
         return (archivoBase.contains(".bc3") && (archivoBase.indexOf("bc3") == archivoBase.length() - 3)) ? 
                 archivoBase.replace("bc3", "html") : 
                 archivoBase + ".html" ;
+    }
+    
+    /**
+     * Este método busca ocurrencias de una determinada cadena
+     * @param args String[] La matriz de cadenas en la que buscar ocurrencias
+     * @param searched String La cadena a buscar
+     * @return boolean El método devuelve true si se encuentran coincidencias y false en cualquier otro caso.
+     */
+    private static boolean lookForAnswerInArray(String[] args, String searched){
+        boolean ret = false;
+        
+        for (String arg : args) {
+            if (arg.equalsIgnoreCase(searched)) {
+                ret = true;
+                break;
+            }
+        }
+        return ret;
     }
 }

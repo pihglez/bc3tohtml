@@ -76,5 +76,6 @@ public class Ayuda {
             + "           El archivo \"archivo.html\" existe en el sistema." + "\n"
             + "           ¿Desea sobreescribirlo [S] Sí | [N] No | [R] Renombrar?" + "\n"
             + "           Con la opción '-y' se asume respuesta positiva a la sobreescritura del archivo." + "\n"
+            + "   -z  muestra una copia de la licencia del software" + "\n"
             ;
 }

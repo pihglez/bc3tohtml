@@ -86,8 +86,13 @@ public class BC3File {
 //                BufferedReader br = new BufferedReader(new FileReader(new File(fileName))); // original
                 
                 
-                // leyendo archivos ANSI (Cp1252)
-                BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream (fileName), "Cp1252"));
+                // leyendo archivos (ANSI (Cp1252))
+                // primero averiguamos la codificación del archivo
+                InputStreamReader isr = new InputStreamReader(new FileInputStream(fileName));
+                String codificacion = isr.getEncoding();
+                isr.close();
+                
+                BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream (fileName), codificacion));
                 // BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(fileName), "Cp1252"));
                 // Alternativas: 850 ("Cp850") DOS | 437 ("Cp437") DOS-US
                 
@@ -234,7 +239,8 @@ public class BC3File {
         if (!LineaComandos.usarPlantillaExterna) {
             plantillaHTML = "/org/ph/htmlFormat/mainTemplate.html";
         } else {
-            // añadir aquí la ruta hacia la plantilla html correspondiente
+            System.out.println("Opción de utilización de plantilla externa no implementada. Utilizando plantilla por defecto.");
+            plantillaHTML = "/org/ph/htmlFormat/mainTemplate.html";
         }
 
         InputStream is = this.getClass().getResourceAsStream(plantillaHTML);
