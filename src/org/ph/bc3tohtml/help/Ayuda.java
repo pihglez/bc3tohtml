@@ -32,7 +32,7 @@ public class Ayuda {
     /**
      * Créditos y descripción del funcionamiento básico del software
      */
-    public static final String INFO = "\nbc3tohtml " + Bc3tohtml.bc3tohtmlVersion + "\n"
+    public static final String INFO = "\nbc3tohtml " + Bc3tohtml.BC3TOHTMLVERSION + "\n"
             + "" + CREDITOS + "\n"
             + "Este software transforma un archivo BC3 en uno HTML.\n"
             + "Uso: java -jar bc3tohtml archivo.bc3\n"

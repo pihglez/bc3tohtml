@@ -18,6 +18,7 @@ package org.ph.bc3tohtml;
 
 import java.util.Scanner;
 import org.ph.System.FileManage;
+import org.ph.System.RandomGenerator;
 import org.ph.System.SystemProperties;
 import org.ph.bc3tohtml.help.Ayuda;
 import org.ph.errors.ErrorInArgumentsException;
@@ -27,7 +28,10 @@ import org.ph.errors.ErrorInArgumentsException;
  * @author Pedro I. Hernández G. <pihglez@gmail.com>
  */
 public class Bc3tohtml {
-    public static String    bc3tohtmlVersion    = "v.0.1.0.0";
+    /**
+     * En esta constante se almacena la versión actual del software
+     */
+    public static final String  BC3TOHTMLVERSION    = "v.0.1.0.0";
 
     /**
      * @param args Argumentos de la línea de comandos
@@ -36,9 +40,9 @@ public class Bc3tohtml {
     public static void main(String[] args) throws ErrorInArgumentsException {
         testArgs(args);
         
-        System.out.println("Plantilla html: "       + LineaComandos.nombrePlantillaHtml);
-        System.out.println("Archivo a procesar: "   + LineaComandos.nombreArchivoAProcesar);
-        System.out.println("Archivo de salida: "    + LineaComandos.nombreArchivoSalida);
+//        System.out.println("Plantilla html: "       + LineaComandos.nombrePlantillaHtml);
+//        System.out.println("Archivo a procesar: "   + LineaComandos.nombreArchivoAProcesar);
+//        System.out.println("Archivo de salida: "    + LineaComandos.nombreArchivoSalida);
         
 //        switch (args.length) {
 //            case 0: System.out.println(Ayuda.INFO);
@@ -70,6 +74,11 @@ public class Bc3tohtml {
 //        }
     }
     
+    /**
+     * Método que comprueba los datos introducidos por el usuario en la línea de comandos.
+     * @param args Array en el que cada elemento es un argumento de la línea de comandos introducido por el usuario
+     * @throws ErrorInArgumentsException Error irrecuperable en la introducción de comandos por parte del usuario
+     */
     private static void testArgs(String[] args) throws ErrorInArgumentsException {
         String s;
         // <editor-fold defaultstate="expanded" desc=" COMMAND LINE SWITCHES SELECTION "> 
@@ -116,7 +125,11 @@ public class Bc3tohtml {
                     LineaComandos.salidaConMediciones = true;
                     break;
                 case "-t":  // utilizar plantilla html
-                    LineaComandos.nombrePlantillaHtml = (s.equals(args[j])) ? args[j + 1] : "";
+                    if((s.equals(args[j])) && (args.length > j)){
+                        LineaComandos.nombrePlantillaHtml = (s.equals(args[j])) ? args[j + 1] : "";
+                    } else {
+                        throw new ErrorInArgumentsException("No se ha designado el archivo de plantilla de manera correcta.");
+                    }
                     break;
                 case "-r":  // resumen
                     LineaComandos.mostrarResumen = true;
@@ -141,9 +154,8 @@ public class Bc3tohtml {
                         }
                         
                     } else {
-                        String nombreArchivoSalida;
-                        nombreArchivoSalida = "";
-                        LineaComandos.nombrarArchivoSalida = false;
+//                        LineaComandos.nombreArchivoSalida   = "";
+                        LineaComandos.nombrarArchivoSalida  = false;
                         throw new ErrorInArgumentsException("El número de argumentos relacionados con el nombre de archivo de salida no es correcto.");
                     }
                     break;
@@ -160,6 +172,22 @@ public class Bc3tohtml {
                             if (args.length == 1) {
                                 if(FileManage.isFileAvailable(args[j])) {
                                     LineaComandos.nombreArchivoAProcesar = args[j];
+                                    LineaComandos.nombreArchivoSalida = setNombreArchivoSalida(args[j]);
+                                    boolean sobreescribir = false;
+                                    while (!FileManage.fileNameIsUsable(LineaComandos.nombreArchivoSalida) && !sobreescribir) {
+                                        if (!preguntarUsuarioSiNo("El archivo " + LineaComandos.nombreArchivoSalida + ""
+                                                + " existe. ¿Desea sobreescribirlo?")) {
+                                            
+                                            LineaComandos.nombreArchivoSalida = LineaComandos.nombreArchivoSalida.replace(".html", 
+                                                    "." + RandomGenerator.getRandomAlphaNumericString(6) + ".html");
+                                            System.out.println("Se ha generado automáticamente el nombre " + LineaComandos.nombreArchivoSalida);
+                                        } else {
+                                            sobreescribir = true;
+                                        }
+                                    }
+                                        
+                                    LineaComandos.nombrePlantillaHtml = "{default}";
+                                    
                                 } else {
                                     // otras opciones que se podrían considerar...
                                     // sobreescribir el archivo, etc.
@@ -177,6 +205,15 @@ public class Bc3tohtml {
         // </editor-fold>
     }
     
+    /**
+     * Plantea una pregunta al usuario a la que sólo tiene que responder sí o no.
+     * Para deducir la respuesta, se adopta únicamente la primera letra de los
+     * datos introducidos por el usuario.
+     * La pregunta se repite hasta que el usuario introduce datos válidos.
+     * El método no es sensible a mayúsculas y minúsculas.
+     * @param pregunta La pregunta cuya respuesta debe ser sí o no.
+     * @return boolean true en caso de que la respuesta haya sido afirmativa y false en caso contrario
+     */
     private static boolean preguntarUsuarioSiNo (String pregunta) {
         String respuesta;
         Scanner s = new Scanner(System.in);
@@ -189,7 +226,17 @@ public class Bc3tohtml {
         return (respuesta.equals("s"));
     }
     
-    private static void setArchivoSalida() {
-        
+    /**
+     * Partiendo del archivo de entrada (*.bc3), genera el nombre del archivo de
+     * salida (*.html)
+     * En el caso de que el archivo tenga extensión .bc3, se cambia por .html
+     * En el caso de que la extensión sea otra, se añade .html al final del todo
+     * @param archivoBase El nombre del archivo de entrada (*.bc3)
+     * @return String El nombre del archivo de salida (*.html)
+     */
+    private static String setNombreArchivoSalida(String archivoBase) {
+        return (archivoBase.contains(".bc3") && (archivoBase.indexOf("bc3") == archivoBase.length() - 3)) ? 
+                archivoBase.replace("bc3", "html") : 
+                archivoBase + ".html" ;
     }
 }
