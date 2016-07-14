@@ -703,5 +703,4 @@ public class Bc3ToHtmlLicense {
     public String getLICENSE() {
         return LICENSE;
     }
-    
 }

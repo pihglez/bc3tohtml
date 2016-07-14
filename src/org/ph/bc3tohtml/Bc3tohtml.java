@@ -31,7 +31,7 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v.0.1.0.0";
+    public static final String  BC3TOHTMLVERSION    = "v.0.2.0.0";
 
     /**
      * @param args Argumentos de la línea de comandos
@@ -83,8 +83,9 @@ public class Bc3tohtml {
         // antes de comenzar con la ejecución, deberían procesarse antes todos los
         // switches con el objetivo de saber, por ejemplo, si se emplea el modificador
         // -y, el -l o el -v
-        LineaComandos.asumirRespuestaPositiva = lookForAnswerInArray(args, "-y");
-        LineaComandos.modoVerbose = lookForAnswerInArray(args, "-v");
+        LineaComandos.asumirRespuestaPositiva   = lookForAnswerInArrayNoCaseSensitive(args, "-y");
+        LineaComandos.modoVerbose               = lookForAnswerInArrayNoCaseSensitive(args, "-v");
+        LineaComandos.mantenerArchivoLog        = lookForAnswerInArrayNoCaseSensitive(args, "-l");
         
         
         // Hay determinadas opciones que únicamente se deberían poder ejecutar en el caso
@@ -98,10 +99,10 @@ public class Bc3tohtml {
                 case "-?":  // ayuda
                     System.out.println(Ayuda.DETAILEDINFO);
                     break;
-                case "/t3st":   // test
-                    System.out.println("¡Modo de prueba seleccionado!");
-                    LineaComandos.opcionTest = true;
-                    break;
+//                case "/t3st":   // test
+//                    System.out.println("¡Modo de prueba seleccionado!");
+//                    LineaComandos.opcionTest = true;
+//                    break;
                 case "-b":  // blind: presupuesto ciego
                     LineaComandos.salidaApresupuestoCiego = true;
                     break;
@@ -126,9 +127,9 @@ public class Bc3tohtml {
                         throw new ErrorInArgumentsException("El archivo " + archivoAProcesar + " falta o no es utilizable.");
                     }
                     break;
-                case "-l":  // generar archivo log
-                    LineaComandos.mantenerArchivoLog = true;
-                    break;
+//                case "-l":  // generar archivo log
+//                    LineaComandos.mantenerArchivoLog = true;
+//                    break;
                 case "-p":  // solo presupuesto
                     break;
                 case "-m":  // con mediciones
@@ -147,7 +148,7 @@ public class Bc3tohtml {
                 case "-s":  // estadísticas
                     LineaComandos.mostrarEstadisticas = true;
                     break;
-                case "-o":  // a continuación se establece el archivo de salida, obviando el nombre por defecto
+                case "-o":  // a continuación se establece el archivo de salida (output), obviando el nombre por defecto
                     if((s.equals(args[j])) && (args.length > j)){
                         String nombreArchivoSalida = args[j + 1];
                         if(FileManage.fileNameIsUsable(nombreArchivoSalida)) {
@@ -184,37 +185,38 @@ public class Bc3tohtml {
 //                    break;
                 
                 case "-z":
+                    System.out.println(Ayuda.INFO);
                     Bc3ToHtmlLicense lic = new Bc3ToHtmlLicense();
                     System.out.println(lic.getLICENSE());
                     break;
                 default:    // se procesa todo lo que explícitamente no entre dentro de uno de los casos previstos
                     switch (args.length) {
                         case 1:
-                            if (args.length == 1) {
-                                if(FileManage.isFileAvailable(args[j])) {
-                                    LineaComandos.nombreArchivoAProcesar = args[j];
-                                    LineaComandos.nombreArchivoSalida = setNombreArchivoSalida(args[j]);
-                                    boolean sobreescribir = false;
-                                    while (!FileManage.fileNameIsUsable(LineaComandos.nombreArchivoSalida) && !sobreescribir) {
-                                        if (!preguntarUsuarioSiNo("El archivo " + LineaComandos.nombreArchivoSalida + ""
-                                                + " existe. ¿Desea sobreescribirlo?")) {
-                                            
-                                            LineaComandos.nombreArchivoSalida = LineaComandos.nombreArchivoSalida.replace(".html", 
-                                                    "." + RandomGenerator.getRandomAlphaNumericString(6) + ".html");
-                                            System.out.println("Se ha generado automáticamente el nombre " + LineaComandos.nombreArchivoSalida);
-                                        } else {
-                                            sobreescribir = true;
-                                        }
+//                            if (args.length == 1) {
+                            if(FileManage.isFileAvailable(args[j])) {
+                                LineaComandos.nombreArchivoAProcesar = args[j];
+                                LineaComandos.nombreArchivoSalida = setNombreArchivoSalida(args[j]);
+                                boolean sobreescribir = false;
+                                while (!FileManage.fileNameIsUsable(LineaComandos.nombreArchivoSalida) && !sobreescribir) {
+                                    if (!preguntarUsuarioSiNo("El archivo " + LineaComandos.nombreArchivoSalida + ""
+                                            + " existe. ¿Desea sobreescribirlo?")) {
+
+                                        LineaComandos.nombreArchivoSalida = LineaComandos.nombreArchivoSalida.replace(".html", 
+                                                "." + RandomGenerator.getRandomAlphaNumericString(6) + ".html");
+                                        System.out.println("Se ha generado automáticamente el nombre " + LineaComandos.nombreArchivoSalida);
+                                    } else {
+                                        sobreescribir = true;
                                     }
-                                        
-                                    LineaComandos.nombrePlantillaHtml = "{default}";
-                                    
-                                } else {
-                                    // otras opciones que se podrían considerar...
-                                    // sobreescribir el archivo, etc.
-                                    throw new ErrorInArgumentsException("El archivo " + args[j] + " falta o no se puede leer.");
                                 }
+
+                                LineaComandos.nombrePlantillaHtml = "{default}";
+
+                            } else {
+                                // otras opciones que se podrían considerar...
+                                // sobreescribir el archivo, etc.
+                                throw new ErrorInArgumentsException("El archivo " + args[j] + " falta o no se puede leer.");
                             }
+//                            }
                             break;
                     }
                     break;
@@ -267,7 +269,7 @@ public class Bc3tohtml {
      * @param searched String La cadena a buscar
      * @return boolean El método devuelve true si se encuentran coincidencias y false en cualquier otro caso.
      */
-    private static boolean lookForAnswerInArray(String[] args, String searched){
+    private static boolean lookForAnswerInArrayNoCaseSensitive(String[] args, String searched){
         boolean ret = false;
         
         for (String arg : args) {
