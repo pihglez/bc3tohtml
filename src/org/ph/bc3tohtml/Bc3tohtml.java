@@ -17,6 +17,7 @@
 package org.ph.bc3tohtml;
 
 import java.util.Scanner;
+import org.apache.commons.cli.Options;
 import org.ph.System.FileManage;
 import org.ph.System.RandomGenerator;
 import org.ph.System.SystemProperties;
@@ -31,7 +32,8 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v.0.2.0.0";
+    public static final String  BC3TOHTMLVERSION    = "v.0.3.0.0";
+    private static Options opciones;
 
     /**
      * @param args Argumentos de la línea de comandos
@@ -40,38 +42,9 @@ public class Bc3tohtml {
     public static void main(String[] args) throws ErrorInArgumentsException {
         testArgs(args);
         
-//        System.out.println("Plantilla html: "       + LineaComandos.nombrePlantillaHtml);
-//        System.out.println("Archivo a procesar: "   + LineaComandos.nombreArchivoAProcesar);
-//        System.out.println("Archivo de salida: "    + LineaComandos.nombreArchivoSalida);
+        opciones = new Options();
+        setCommanLineOptions();
         
-//        switch (args.length) {
-//            case 0: System.out.println(Ayuda.INFO);
-//                break;
-//            case 1: 
-//                if (args[0].equalsIgnoreCase("-i")) {
-////                    SystemProperties sp = new SystemProperties();
-////                    System.out.println(sp.toConsoleString());
-//                } else {
-//                    /*
-//                    ** Esto hay que hacerlo de otra manera...
-//                    ** al introducir los datos el usuario puede hacerlo, incialmente,
-//                    ** únicamente de dos maneras...
-//                    **  1. manera resumida o directa: java -jar bc3tohtml archivo.bc3
-//                    **  2. manera larga con argumentos en la línea de comando: ...
-//                    */
-//                    
-////////                    BC3File fip = new BC3File(args[0]);
-////////                    
-////////                    if (fip.inspect()) {
-////////                        if (!(fip.bc3tohtml())) System.out.println("Conversión NO realizada o realizada parcialmente.");
-////////                        else System.out.println("Conversión finalizada.");
-////////                    } else {
-////////                        System.out.println("\nEl archivo referenciado " + args[0] + " NO es procesable"
-////////                                + " (no se puede leer, no es un archivo, no existe o es una carpeta).");
-////////                    }
-//                }
-//                break;
-//        }
     }
     
     /**
@@ -233,7 +206,7 @@ public class Bc3tohtml {
      * Para deducir la respuesta, se adopta únicamente la primera letra de los
      * datos introducidos por el usuario.
      * La pregunta se repite hasta que el usuario introduce datos válidos.
-     * El método no es sensible a mayúsculas y minúsculas.
+     * El método no es sensible a mayúsculas y/o minúsculas.
      * @param pregunta La pregunta cuya respuesta debe ser sí o no.
      * @return boolean true en caso de que la respuesta haya sido afirmativa y false en caso contrario
      */
@@ -279,5 +252,22 @@ public class Bc3tohtml {
             }
         }
         return ret;
+    }
+    
+    private static void setCommanLineOptions(){
+        opciones.addOption("?", false, "");     // ayuda
+        opciones.addOption("b", false, "");     // presupuesto ciego
+        opciones.addOption("d", false, "");     // solo descompuestos
+        opciones.addOption("e", false, "");     // solo elementales
+        opciones.addOption("f", true, "");      // archivo (file) de entrada
+        opciones.addOption("l", true, "");      // archivo (log) de volcado
+        opciones.addOption("m", false, "");     // incluir mediciones
+        opciones.addOption("o", true, "");      // archivo (output) de salida
+        opciones.addOption("p", false, "");     // incluir presupuesto
+        opciones.addOption("r", false, "");     // incluir resumen
+        opciones.addOption("s", false, "");     // mostrar estadísticas
+        opciones.addOption("t", true, "");      // archivo (template) a utilizar
+        opciones.addOption("y", false, "");     // asumir sí (yes) a cualquier pregunta
+        opciones.addOption("z", false, "");     // muestra la licencia
     }
 }
