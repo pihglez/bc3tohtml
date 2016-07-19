@@ -270,6 +270,7 @@ public class Bc3tohtml {
         opciones.addOption("r", false, "");     // incluir resumen
         opciones.addOption("s", false, "");     // mostrar estadísticas
         opciones.addOption("t", true, "");      // archivo (template) a utilizar
+        opciones.addOption("v", false, "");     // muestra la versión del software
         opciones.addOption("y", false, "");     // asumir sí (yes) a cualquier pregunta
         opciones.addOption("z", false, "");     // muestra la licencia
     }
