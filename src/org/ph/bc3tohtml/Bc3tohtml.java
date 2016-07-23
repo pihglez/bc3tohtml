@@ -36,7 +36,7 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v.0.3.6.0";
+    public static final String  BC3TOHTMLVERSION    = "v.0.3.6.5";
     public static final String  APPNAME             = "bc3tohtml";
     private static Options opciones;
 
@@ -152,7 +152,7 @@ public class Bc3tohtml {
 //    }
     
     /**
-     * Este método establece las opciones utilizables a través de la línea de comandos.
+     * Este método establece las opciones reconocibles a través de la línea de comandos.
      */
     private static void setCommanLineOptions(){
         opciones.addOption("?", false,  "Muestra esta ayuda");                                                      // ayuda
