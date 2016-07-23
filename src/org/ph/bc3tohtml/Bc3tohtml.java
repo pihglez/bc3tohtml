@@ -36,7 +36,7 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v.0.3.5.0";
+    public static final String  BC3TOHTMLVERSION    = "v.0.3.6.0";
     public static final String  APPNAME             = "bc3tohtml";
     private static Options opciones;
 
@@ -82,8 +82,9 @@ public class Bc3tohtml {
                     if (argumentIsFileName(args[0]))                procesarArchivo(args[0]);
                     break;
                 default:
-                    if (args.length > 3) {
+                    if (args.length > 2) {
                         // bc3tohtml -f archivo.bc3 -o archivo.html
+                        // bc3tohtml -f archivo.bc3 -p                          // se presupone equivalente a --> bc3tohtml archivo.bc3 (implementar)
                         gestionaArgumentos(cmd);
                     } else {
                         System.out.println(Ayuda.INFO + Ayuda.DESCRIPCION);
@@ -92,7 +93,7 @@ public class Bc3tohtml {
                     break;
             }
         } catch (ParseException ex) {
-            System.out.println("Error al leer la línea de comandos.\n" + ex.getLocalizedMessage());
+            System.out.println("Error al leer la línea de comandos: " + ex.getLocalizedMessage());
         }
         
     }
@@ -132,23 +133,23 @@ public class Bc3tohtml {
                 archivoBase + ".html" ;
     }
     
-    /**
-     * Este método busca ocurrencias de una determinada cadena
-     * @param args String[] La matriz de cadenas en la que buscar ocurrencias
-     * @param searched String La cadena a buscar
-     * @return boolean El método devuelve true si se encuentran coincidencias y false en cualquier otro caso.
-     */
-    private static boolean lookForAnswerInArrayNoCaseSensitive(String[] args, String searched){
-        boolean ret = false;
-        
-        for (String arg : args) {
-            if (arg.equalsIgnoreCase(searched)) {
-                ret = true;
-                break;
-            }
-        }
-        return ret;
-    }
+//    /**
+//     * Este método busca ocurrencias de una determinada cadena
+//     * @param args String[] La matriz de cadenas en la que buscar ocurrencias
+//     * @param searched String La cadena a buscar
+//     * @return boolean El método devuelve true si se encuentran coincidencias y false en cualquier otro caso.
+//     */
+//    private static boolean lookForAnswerInArrayNoCaseSensitive(String[] args, String searched){
+//        boolean ret = false;
+//        
+//        for (String arg : args) {
+//            if (arg.equalsIgnoreCase(searched)) {
+//                ret = true;
+//                break;
+//            }
+//        }
+//        return ret;
+//    }
     
     /**
      * Este método establece las opciones utilizables a través de la línea de comandos.
@@ -162,7 +163,7 @@ public class Bc3tohtml {
         opciones.addOption("l", true,   "Especifica a continuación el archivo de volcado (.log)");                  // archivo (log) de volcado
         opciones.addOption("m", false,  "Incluye las mediciones en el presupuesto");                                // incluir mediciones
         opciones.addOption("o", true,   "Especifica a continuación el archivo de salida (.html)");                  // archivo (output) de salida
-        opciones.addOption("p", false,  "Incluye el presupuesto (opción por defecto)");                             // incluir presupuesto
+        opciones.addOption("p", false,  "Incluye el presupuesto (opción por defecto con un solo argumento)");       // incluir presupuesto
         opciones.addOption("r", false,  "Incluye el resumen de presupuesto");                                       // incluir resumen
         opciones.addOption("s", false,  "Muestra estadísticas");                                                    // mostrar estadísticas
         opciones.addOption("t", true,   "Especifica a continuación el archivo de plantilla a utilizar (.html)");    // archivo (template) a utilizar
@@ -224,8 +225,40 @@ public class Bc3tohtml {
     }
     
     private static void procesarArchivo() {
-        System.out.println("El archivo a procesar es: " + LineaComandos.nombreArchivoAProcesar);
-        System.out.println("El archivo de salida es: "  + LineaComandos.nombreArchivoSalida);
+        // procesar las variables para ver si es posible analizar el archivo y guardar
+        // los resultados
+        try {
+            // el archivo de entrada debe existir y ser accesible
+            if (!(FileManage.isFileAvailable(LineaComandos.nombreArchivoAProcesar))) {
+                // no ok
+                throw new ErrorInArgumentsException("El archivo de origen no puede ser leído.");
+            }
+            
+            // el archivo de salida NO debe existir
+            if ((FileManage.isFileAvailable(LineaComandos.nombreArchivoSalida))) {
+                // no ok
+                throw new ErrorInArgumentsException("El archivo de salida existe. Debe especificar un nombre válido.");
+            }
+            
+            // deben establecerse alguno de los argumentos de proceso válidos (-p o -r)
+            if (!(  LineaComandos.incluirResumen            ||
+                    LineaComandos.incluirPresupuesto        || 
+                    LineaComandos.salidaSoloDescompuestos   ||
+                    LineaComandos.salidaSoloElementales)) {
+                
+                throw new ErrorInArgumentsException(""
+                        + "Los argumentos de proceso establecidos no son válidos.\n"
+                        + "Debe elegir uno o varios de los elementos de salida:\n"
+                        + "resumen, presupuesto, descompuestos o elementales");
+            }
+            
+            // se cumplen las condiciones --> se realiza el proceso del archivo .bc3
+//            System.out.println("Archivo de entrada: " + LineaComandos.nombreArchivoAProcesar);
+//            System.out.println("Archivo de salida: " + LineaComandos.nombreArchivoSalida);
+            
+        } catch (ErrorInArgumentsException ex) {
+            System.out.println("Error irrecuperable: " + ex.getMessage());
+        }
     }
     
     /**
@@ -234,43 +267,57 @@ public class Bc3tohtml {
      * @param nombreArchivo <strong>String</strong> Nombre del archivo a procesar
      */
     private static void procesarArchivo (String nombreArchivo) {
-        LineaComandos.nombreArchivoAProcesar    = (FileManage.isFileAvailable(nombreArchivo)) ? nombreArchivo : null;
-        String archivoSalida                    = FileManage.getNameFromBase(LineaComandos.nombreArchivoAProcesar, "html");
-        LineaComandos.nombreArchivoSalida       = (!FileManage.isFileAvailable(archivoSalida)) ? archivoSalida : null;
+        LineaComandos.nombreArchivoAProcesar        = (FileManage.isFileAvailable(nombreArchivo)) ? nombreArchivo : null;
+        String archivoSalida                        = FileManage.getNameFromBase(LineaComandos.nombreArchivoAProcesar, "html");
+        LineaComandos.nombreArchivoSalida           = (!FileManage.isFileAvailable(archivoSalida)) ? archivoSalida : null;
         
         // hay que establecer los valores por defecto de las variables de trabajo
         // que se establecen en gestionaArgumentos según la entrada del usuario
+        LineaComandos.incluirResumen                = true;
+        LineaComandos.incluirPresupuesto            = true;
         
         procesarArchivo();
     }
     
     private static void gestionaArgumentos(CommandLine cmd) {
-        if(opciones.hasOption("f") && opciones.hasOption("o")){
+        if(cmd.hasOption("f")){
+            LineaComandos.nombreArchivoAProcesar    = cmd.getOptionValue("f");
+            
+            LineaComandos.nombreArchivoSalida       =(cmd.hasOption("o"))      ?
+                                                      cmd.getOptionValue("o")   : 
+                                                      setNombreArchivoSalida(LineaComandos.nombreArchivoAProcesar);
+//            System.out.println("opcion 'o': " + opciones.hasOption("o"));
+//            System.out.println("base:       " + LineaComandos.nombreArchivoAProcesar);
+//            System.out.println("salida:     " + setNombreArchivoSalida(LineaComandos.nombreArchivoAProcesar));
+//            System.out.println("real:       " + LineaComandos.nombreArchivoSalida);
+//            if(opciones.hasOption("o")) {
+//                LineaComandos.nombreArchivoSalida   = cmd.getOptionValue("o");
+//            } else {
+//                LineaComandos.nombreArchivoSalida   = setNombreArchivoSalida(LineaComandos.nombreArchivoAProcesar);
+//            }
             LineaComandos.nombrarArchivoSalida      = true;
             
-            LineaComandos.nombreArchivoAProcesar    = cmd.getOptionValue("f");
-            LineaComandos.nombreArchivoSalida       = cmd.getOptionValue("o");
+            LineaComandos.mostrarEstadisticas       = cmd.hasOption("s");
+            LineaComandos.modoVerbose               = cmd.hasOption("w");
             
-            LineaComandos.mostrarEstadisticas       = opciones.hasOption("s");
-            LineaComandos.modoVerbose               = opciones.hasOption("w");
-            LineaComandos.usarPlantillaExterna      = opciones.hasOption("t");
-            
+            LineaComandos.usarPlantillaExterna      = cmd.hasOption("t");
             if(LineaComandos.usarPlantillaExterna) {
                 // implementar uso de plantilla externa
             }
             
-            LineaComandos.salidaApresupuestoCiego   = opciones.hasOption("b");
-            LineaComandos.salidaSoloDescompuestos   = opciones.hasOption("d");
-            LineaComandos.salidaSoloElementales     = opciones.hasOption("e");
-            LineaComandos.salidaConMediciones       = opciones.hasOption("m");
-            LineaComandos.incluirResumen            = opciones.hasOption("r");
+            LineaComandos.salidaApresupuestoCiego   = cmd.hasOption("b");
+            LineaComandos.salidaSoloDescompuestos   = cmd.hasOption("d");
+            LineaComandos.salidaSoloElementales     = cmd.hasOption("e");
+            LineaComandos.salidaConMediciones       = cmd.hasOption("m");
+            LineaComandos.incluirResumen            = cmd.hasOption("r");
+            LineaComandos.incluirPresupuesto        = cmd.hasOption("p");
             
-            LineaComandos.mantenerArchivoLog        = opciones.hasOption("l");
+            LineaComandos.mantenerArchivoLog        = cmd.hasOption("l");
             if(LineaComandos.mantenerArchivoLog){
                 // implementar uso de archivo log
             }
             
-            LineaComandos.asumirRespuestaPositiva   = opciones.hasOption("y");
+            LineaComandos.asumirRespuestaPositiva   = cmd.hasOption("y");
             
             procesarArchivo();
         }

@@ -70,6 +70,10 @@ public class LineaComandos {
      */
     public static boolean asumirRespuestaPositiva   = false;    // -y
     /**
+     * Activa la salida del presupuesto
+     */
+    public static boolean incluirPresupuesto        = true;     // -p
+    /**
      * Nombre de la plantilla html a utilizar (distinta de la de defecto)
      */
     public static String nombrePlantillaHtml;

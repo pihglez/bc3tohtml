@@ -41,7 +41,14 @@ public class FileManage {
      * @return <code>true</code> en el caso de que se cumplan las condiciones y <code>false</code> en caso contrario
      */
     public static boolean isFileAvailable (File file) {
-        return ((file.canRead() && file.isFile() && file.exists() && !file.isDirectory()));
+//        boolean fa = false;
+//        if(file.exists()) {
+//            if (file.isFile()) {
+//                if (file.canRead()) fa = true;
+//            }
+//        }
+        return ((file.exists() && file.canRead() && file.isFile() && !file.isDirectory()));
+//        return fa;
     }
     
     /**
