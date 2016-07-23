@@ -54,4 +54,16 @@ public class FileManage {
         
         return !(f.exists() || f.isDirectory());
     }
+    
+    /**
+     * Método que, a partir del nombre completo de un archivo archivo.extension,
+     * devuelve el nuevo nombre completo con la nueva extensión.
+     * @param nombreArchivoBase String El nombre completo utilizado como base.
+     * @param nuevaExtensionArchivo String La extensión que sustituirá la extensión del archivo de base.
+     * @return 
+     */
+    public static String getNameFromBase(String nombreArchivoBase, String nuevaExtensionArchivo) {
+        int n = nombreArchivoBase.lastIndexOf(".");
+        return nombreArchivoBase.substring(0, n).concat(".").concat(nuevaExtensionArchivo);
+    }
 }

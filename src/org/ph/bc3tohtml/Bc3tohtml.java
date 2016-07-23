@@ -23,7 +23,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.ph.System.FileManage;
-import org.ph.System.RandomGenerator;
+//import org.ph.System.RandomGenerator;
 import org.ph.System.SystemProperties;
 import org.ph.bc3tohtml.help.Ayuda;
 import org.ph.errors.ErrorInArgumentsException;
@@ -62,9 +62,9 @@ public class Bc3tohtml {
         // antes de comenzar con la ejecución, deberían procesarse antes todos los
         // switches con el objetivo de saber, por ejemplo, si se emplea el modificador
         // -y, el -l o el -v
-        LineaComandos.asumirRespuestaPositiva   = lookForAnswerInArrayNoCaseSensitive(args, "-y");
-        LineaComandos.modoVerbose               = lookForAnswerInArrayNoCaseSensitive(args, "-v");
-        LineaComandos.mantenerArchivoLog        = lookForAnswerInArrayNoCaseSensitive(args, "-l");
+//        LineaComandos.asumirRespuestaPositiva   = lookForAnswerInArrayNoCaseSensitive(args, "-y");
+//        LineaComandos.modoVerbose               = lookForAnswerInArrayNoCaseSensitive(args, "-v");
+//        LineaComandos.mantenerArchivoLog        = lookForAnswerInArrayNoCaseSensitive(args, "-l");
         
 //        CommandLineParser parser = new DefaultParser();
         try {
@@ -75,152 +75,26 @@ public class Bc3tohtml {
                     break;
                 case 1:
                     if (cmd.hasOption("?") || (args.length == 0))   showCmdHelp();
+                    if (cmd.hasOption("i"))                         showSimpleSystemInfo();
+                    if (cmd.hasOption("v"))                         showAppVersion();
                     if (cmd.hasOption("z"))                         showLicense();
-                    // hay que commprobar si el argumento es o no un archivo
-                    if (testIfArgumentShouldBeFile(args[0])) System.out.println("El argumento debe ser un archivo que procesar :-P");;
+                    
+                    if (argumentIsFileName(args[0]))                procesarArchivo(args[0]);
                     break;
                 default:
+                    if (args.length > 3) {
+                        // bc3tohtml -f archivo.bc3 -o archivo.html
+                        gestionaArgumentos(cmd);
+                    } else {
+                        System.out.println(Ayuda.INFO + Ayuda.DESCRIPCION);
+                        System.out.println("Parece que ha introducido un número incorrecto de argumentos. Por favor, verifique la ayuda.");
+                    }
                     break;
             }
         } catch (ParseException ex) {
             System.out.println("Error al leer la línea de comandos.\n" + ex.getLocalizedMessage());
-        }   
-                
-        String s;
-        // <editor-fold defaultstate="expanded" desc=" COMMAND LINE SWITCHES SELECTION "> 
-//////////        for (int j = 0; j < args.length; j++) {
-//////////            s = args[j];
-//////////            switch (s.toLowerCase()) {
-//////////                case "-?":  // ayuda
-//////////                    System.out.println(Ayuda.DETAILEDINFO);
-//////////                    break;
-////////////                case "/t3st":   // test
-////////////                    System.out.println("¡Modo de prueba seleccionado!");
-////////////                    LineaComandos.opcionTest = true;
-////////////                    break;
-//////////                case "-b":  // blind: presupuesto ciego
-//////////                    LineaComandos.salidaApresupuestoCiego = true;
-//////////                    break;
-//////////                case "-i":  // información del sistema
-//////////                    System.out.println(Ayuda.INFO);
-//////////                    SystemProperties sp = new SystemProperties();
-//////////                    System.out.println(sp.toConsoleString());
-//////////                    break;
-//////////                case "-d":  // solo descompuestos
-//////////                    LineaComandos.salidaSoloDescompuestos = true;
-//////////                    break;
-//////////                case "-e":  // solo elementales
-//////////                    LineaComandos.salidaSoloElementales = true;
-//////////                    break;
-//////////                case "-f":  // a continuación se establece el archivo de entrada, a procesar
-//////////                    String archivoAProcesar = (s.equals(args[j]) && args.length > j) ? args[j + 1] : args[j];
-//////////                    
-//////////                    if(FileManage.isFileAvailable(archivoAProcesar)) {
-//////////                        LineaComandos.nombreArchivoAProcesar = archivoAProcesar;
-//////////                        LineaComandos.nombrarArchivoSalida = true;
-//////////                    } else {
-//////////                        throw new ErrorInArgumentsException("El archivo " + archivoAProcesar + " falta o no es utilizable.");
-//////////                    }
-//////////                    break;
-////////////                case "-l":  // generar archivo log
-////////////                    LineaComandos.mantenerArchivoLog = true;
-////////////                    break;
-//////////                case "-p":  // solo presupuesto
-//////////                    break;
-//////////                case "-m":  // con mediciones
-//////////                    LineaComandos.salidaConMediciones = true;
-//////////                    break;
-//////////                case "-t":  // utilizar plantilla html
-//////////                    if((s.equals(args[j])) && (args.length > j)){
-//////////                        LineaComandos.nombrePlantillaHtml = (s.equals(args[j])) ? args[j + 1] : "";
-//////////                    } else {
-//////////                        throw new ErrorInArgumentsException("No se ha designado el archivo de plantilla de manera correcta.");
-//////////                    }
-//////////                    break;
-//////////                case "-r":  // resumen
-//////////                    LineaComandos.mostrarResumen = true;
-//////////                    break;
-//////////                case "-s":  // estadísticas
-//////////                    LineaComandos.mostrarEstadisticas = true;
-//////////                    break;
-//////////                case "-o":  // a continuación se establece el archivo de salida (output), obviando el nombre por defecto
-//////////                    if((s.equals(args[j])) && (args.length > j)){
-//////////                        String nombreArchivoSalida = args[j + 1];
-//////////                        if(FileManage.fileNameIsUsable(nombreArchivoSalida)) {
-//////////                            LineaComandos.nombreArchivoSalida = nombreArchivoSalida;
-//////////                            LineaComandos.nombrarArchivoSalida = true;
-//////////                        } else {
-//////////                            // otras opciones que se podrían considerar...
-//////////                            // sobreescribir el archivo, etc.
-//////////                            if (!LineaComandos.asumirRespuestaPositiva) {
-//////////                                    if (!preguntarUsuarioSiNo("¿Sobreescribir el archivo " + nombreArchivoSalida + "?")) {
-//////////                                    LineaComandos.nombreArchivoSalida = nombreArchivoSalida;
-//////////                                    LineaComandos.nombrarArchivoSalida = true;
-//////////                                } else {
-//////////                                        throw new ErrorInArgumentsException("El archivo " + nombreArchivoSalida + " falta o no es utilizable.");
-//////////                                    }
-//////////                            } else {
-//////////                                LineaComandos.nombreArchivoSalida = nombreArchivoSalida;
-//////////                                LineaComandos.nombrarArchivoSalida = true;
-//////////                            }
-//////////                            
-//////////                        }
-//////////                        
-//////////                    } else {
-////////////                        LineaComandos.nombreArchivoSalida   = "";
-//////////                        LineaComandos.nombrarArchivoSalida  = false;
-//////////                        throw new ErrorInArgumentsException("El número de argumentos relacionados con el nombre de archivo de salida no es correcto.");
-//////////                    }
-//////////                    break;
-////////////                case "-v":  // modo verbose... se muestran en pantalla todos los pasos... :-P
-////////////                    LineaComandos.modoVerbose = true;
-////////////                    break;
-////////////                case "-y":
-////////////                    LineaComandos.asumirRespuestaPositiva = true;
-////////////                    break;
-//////////                
-//////////                case "-z":
-//////////                    System.out.println(Ayuda.INFO);
-//////////                    Bc3ToHtmlLicense lic = new Bc3ToHtmlLicense();
-//////////                    System.out.println(lic.getLICENSE());
-//////////                    break;
-//////////                default:    // se procesa todo lo que explícitamente no entre dentro de uno de los casos previstos
-//////////                    switch (args.length) {
-//////////                        case 1:
-////////////                            if (args.length == 1) {
-//////////                            if(FileManage.isFileAvailable(args[j])) {
-//////////                                LineaComandos.nombreArchivoAProcesar = args[j];
-//////////                                LineaComandos.nombreArchivoSalida = setNombreArchivoSalida(args[j]);
-//////////                                boolean sobreescribir = false;
-//////////                                while (!FileManage.fileNameIsUsable(LineaComandos.nombreArchivoSalida) && !sobreescribir) {
-//////////                                    if (!preguntarUsuarioSiNo("El archivo " + LineaComandos.nombreArchivoSalida + ""
-//////////                                            + " existe. ¿Desea sobreescribirlo?")) {
-//////////
-//////////                                        LineaComandos.nombreArchivoSalida = LineaComandos.nombreArchivoSalida.replace(".html", 
-//////////                                                "." + RandomGenerator.getRandomAlphaNumericString(6) + ".html");
-//////////                                        System.out.println("Se ha generado automáticamente el nombre " + LineaComandos.nombreArchivoSalida);
-//////////                                    } else {
-//////////                                        sobreescribir = true;
-//////////                                    }
-//////////                                }
-//////////
-//////////                                LineaComandos.nombrePlantillaHtml = "{default}";
-//////////
-//////////                            } else {
-//////////                                // otras opciones que se podrían considerar...
-//////////                                // sobreescribir el archivo, etc.
-//////////                                throw new ErrorInArgumentsException("El archivo " + args[j] + " falta o no se puede leer.");
-//////////                            }
-////////////                            }
-//////////                            break;
-//////////                    }
-//////////                    break;
-//////////            }
-//////////        }
-//////////        if (args.length == 0) {
-//////////            System.out.println(Ayuda.INFO);
-//////////        }
-        // </editor-fold>
+        }
+        
     }
     
     /**
@@ -280,21 +154,23 @@ public class Bc3tohtml {
      * Este método establece las opciones utilizables a través de la línea de comandos.
      */
     private static void setCommanLineOptions(){
-        opciones.addOption("?", false,  "Muestra esta ayuda");                                          // ayuda
-        opciones.addOption("b", false,  "Genera un presupuesto ciego");                                 // presupuesto ciego
-        opciones.addOption("d", false,  "Genera un documento sólo con los precios descompuestos");      // solo descompuestos
-        opciones.addOption("e", false,  "Genera un documento sólo con los precios elementales");        // solo elementales
-        opciones.addOption("f", true,   "Especifica a continuación el archivo de entrada (.bc3)");      // archivo (file) de entrada
-        opciones.addOption("l", true,   "Especifica a continuación el archivo de volcado (.log)");      // archivo (log) de volcado
-        opciones.addOption("m", false,  "Incluye las mediciones en el presupuesto");                    // incluir mediciones
-        opciones.addOption("o", true,   "Especifica a continuación el archivo de salida (.html)");      // archivo (output) de salida
-        opciones.addOption("p", false,  "Incluye el presupuesto (opción por defecto)");                 // incluir presupuesto
-        opciones.addOption("r", false,  "Incluye el resumen de presupuesto");                           // incluir resumen
-        opciones.addOption("s", false,  "Muestra estadísticas");                                        // mostrar estadísticas
-        opciones.addOption("t", true,   "Especifica a continuación el archivo de plantilla a utilizar (.html)");      // archivo (template) a utilizar
-        opciones.addOption("v", false,  "Muestra la versión del sofware");                              // muestra la versión del software
-        opciones.addOption("y", false,  "Asume una respuesta positiva a las posibles preguntas");       // asumir sí (yes) a cualquier pregunta
-        opciones.addOption("z", false,  "Muestra la licencia del software");                            // muestra la licencia
+        opciones.addOption("?", false,  "Muestra esta ayuda");                                                      // ayuda
+        opciones.addOption("b", false,  "Genera un presupuesto ciego (sin precios ni importes)");                   // presupuesto ciego
+        opciones.addOption("d", false,  "Genera un documento sólo con los precios descompuestos");                  // solo descompuestos
+        opciones.addOption("e", false,  "Genera un documento sólo con los precios elementales");                    // solo elementales
+        opciones.addOption("f", true,   "Especifica a continuación el archivo de entrada (.bc3)");                  // archivo (file) de entrada
+        opciones.addOption("l", true,   "Especifica a continuación el archivo de volcado (.log)");                  // archivo (log) de volcado
+        opciones.addOption("m", false,  "Incluye las mediciones en el presupuesto");                                // incluir mediciones
+        opciones.addOption("o", true,   "Especifica a continuación el archivo de salida (.html)");                  // archivo (output) de salida
+        opciones.addOption("p", false,  "Incluye el presupuesto (opción por defecto)");                             // incluir presupuesto
+        opciones.addOption("r", false,  "Incluye el resumen de presupuesto");                                       // incluir resumen
+        opciones.addOption("s", false,  "Muestra estadísticas");                                                    // mostrar estadísticas
+        opciones.addOption("t", true,   "Especifica a continuación el archivo de plantilla a utilizar (.html)");    // archivo (template) a utilizar
+        opciones.addOption("v", false,  "Muestra la versión del sofware");                                          // muestra la versión del software
+        opciones.addOption("w", false,  "Activa el modo de información adicional (verbose)");                       // muestra la versión del software
+        opciones.addOption("y", false,  "Asume una respuesta positiva a las posibles preguntas");                   // asumir sí (yes) a cualquier pregunta
+        opciones.addOption("z", false,  "Muestra la licencia del software");                                        // muestra la licencia
+        opciones.addOption("i", false,  "Muestra información del sistema");                                         // muestra información del sistema
     }
     
     /**
@@ -307,12 +183,28 @@ public class Bc3tohtml {
     }
     
     /**
-     * Este método muesra en pantalla la licencia del software sin paginación.
+     * Este método muestra en pantalla la licencia del software, sin paginación.
      */
     private static void showLicense() {
         System.out.println(Ayuda.INFO);
         Bc3ToHtmlLicense lic = new Bc3ToHtmlLicense();
         System.out.println(lic.getLICENSE());
+    }
+    
+    /**
+     * Muestra información básica del sistema SIN variables de entorno.
+     */
+    private static void showSimpleSystemInfo() {
+        System.out.println(Ayuda.INFO);
+        SystemProperties sp = new SystemProperties();
+        System.out.println(sp.toConsoleString(false));
+    }
+    
+    private static void showAppVersion() {
+        System.out.println(""
+                + "Nombre:    " + APPNAME + "\n"
+                + "Productor: " + Ayuda.CREDITOS
+                + "Versión:   " + BC3TOHTMLVERSION + "\n");
     }
     
     /**
@@ -322,9 +214,65 @@ public class Bc3tohtml {
      * @param argument El argumento a comprobar si está entre las opciones previstas
      * @return true en el caso de que el argumento pueda ser un archivo
      */
-    private static boolean testIfArgumentShouldBeFile(String argument) {
-        boolean figureArchive = false;
-        if(!opciones.hasOption(argument)) figureArchive = true;
-        return figureArchive;
+    private static boolean argumentIsFileName(String argument) {
+        boolean figureOutArchive = false;
+        if(!opciones.hasOption(argument)) figureOutArchive = true;
+        if (figureOutArchive) {
+            if (!(FileManage.isFileAvailable(argument))) figureOutArchive = false;
+        }
+        return figureOutArchive;
+    }
+    
+    private static void procesarArchivo() {
+        System.out.println("El archivo a procesar es: " + LineaComandos.nombreArchivoAProcesar);
+        System.out.println("El archivo de salida es: "  + LineaComandos.nombreArchivoSalida);
+    }
+    
+    /**
+     * Ejecución en el caso de que el usuario introduzca un único parámetro
+     * un único parámetro que debe coincidir con el nombre del archivo a procesar
+     * @param nombreArchivo <strong>String</strong> Nombre del archivo a procesar
+     */
+    private static void procesarArchivo (String nombreArchivo) {
+        LineaComandos.nombreArchivoAProcesar    = (FileManage.isFileAvailable(nombreArchivo)) ? nombreArchivo : null;
+        String archivoSalida                    = FileManage.getNameFromBase(LineaComandos.nombreArchivoAProcesar, "html");
+        LineaComandos.nombreArchivoSalida       = (!FileManage.isFileAvailable(archivoSalida)) ? archivoSalida : null;
+        
+        // hay que establecer los valores por defecto de las variables de trabajo
+        // que se establecen en gestionaArgumentos según la entrada del usuario
+        
+        procesarArchivo();
+    }
+    
+    private static void gestionaArgumentos(CommandLine cmd) {
+        if(opciones.hasOption("f") && opciones.hasOption("o")){
+            LineaComandos.nombrarArchivoSalida      = true;
+            
+            LineaComandos.nombreArchivoAProcesar    = cmd.getOptionValue("f");
+            LineaComandos.nombreArchivoSalida       = cmd.getOptionValue("o");
+            
+            LineaComandos.mostrarEstadisticas       = opciones.hasOption("s");
+            LineaComandos.modoVerbose               = opciones.hasOption("w");
+            LineaComandos.usarPlantillaExterna      = opciones.hasOption("t");
+            
+            if(LineaComandos.usarPlantillaExterna) {
+                // implementar uso de plantilla externa
+            }
+            
+            LineaComandos.salidaApresupuestoCiego   = opciones.hasOption("b");
+            LineaComandos.salidaSoloDescompuestos   = opciones.hasOption("d");
+            LineaComandos.salidaSoloElementales     = opciones.hasOption("e");
+            LineaComandos.salidaConMediciones       = opciones.hasOption("m");
+            LineaComandos.incluirResumen            = opciones.hasOption("r");
+            
+            LineaComandos.mantenerArchivoLog        = opciones.hasOption("l");
+            if(LineaComandos.mantenerArchivoLog){
+                // implementar uso de archivo log
+            }
+            
+            LineaComandos.asumirRespuestaPositiva   = opciones.hasOption("y");
+            
+            procesarArchivo();
+        }
     }
 }

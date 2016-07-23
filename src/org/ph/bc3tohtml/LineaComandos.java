@@ -60,7 +60,7 @@ public class LineaComandos {
     /**
      * Activa la salida del resumen de presupuesto
      */
-    public static boolean mostrarResumen            = false;    // -r
+    public static boolean incluirResumen            = false;    // -r
     /**
      * Activa la opción de mantener un log que se guarda en un archivo
      */
