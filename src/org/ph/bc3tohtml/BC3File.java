@@ -28,6 +28,10 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.ph.System.FileManage;
 import org.ph.bc3Format.ConstantesTexto;
 import org.ph.bc3Format.Registro_C_concepto;
@@ -39,6 +43,7 @@ import org.ph.bc3Format.Registro_L_pliegos;
 import org.ph.bc3Format.Registro_M_mediciones;
 import org.ph.bc3Format.Registro_T_texto;
 import org.ph.bc3Format.Registro_V_prpdad;
+import org.ph.errors.ErrorInFormatException;
 import org.ph.loggerToFile.Bc3ParserLogger;
 
 /**
@@ -46,7 +51,7 @@ import org.ph.loggerToFile.Bc3ParserLogger;
  * @author Pedro I. Hernández G. <pihglez@gmail.com>
  */
 public class BC3File {
-    private final String                                fileName;
+    private final String                                bc3FileToProcess;
     
     private Registro_V_prpdad                           rPropiedad;
     private Registro_K_coeficientes                     rCoeficientes;
@@ -65,34 +70,29 @@ public class BC3File {
      * @param fileName ruta del archivo a leer
      */
     public BC3File (String fileName) {
-        this.fileName = fileName;
+        this.bc3FileToProcess = fileName;
     }
     
-    public  boolean inspect() {
-        return FileManage.isFileAvailable(fileName);
-    }
+//    public  boolean inspect() {
+//        return FileManage.isFileAvailable(bc3FileToProcess);
+//    }
     
-    public boolean bc3tohtml() {
+    public boolean procesaBC3() throws ErrorInFormatException {
         if (LineaComandos.mantenerArchivoLog) log = new Bc3ParserLogger();
         boolean conversion = false, procesar = false;
-        if (inspect()) {
+        if (FileManage.isFileAvailable(bc3FileToProcess)) {
             try {
-                if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Procesando " + fileName);
+                if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Procesando " + bc3FileToProcess);
                 String lineaLeida;      // almacenamiento de la línea leída
-                int numLineaLeida = 1;  // Número de línea leída
+                int numLineaLeida = 0;  // Número de línea leída
 //                boolean mostrarLineas = false; int mLdesde = 1090, mLhasta = 1100; // para bucle de control
                 
-                // se lee el archivo línea a línea
-//                BufferedReader br = new BufferedReader(new FileReader(new File(fileName))); // original
-                
-                
-                // leyendo archivos (ANSI (Cp1252))
                 // primero averiguamos la codificación del archivo
-                InputStreamReader isr = new InputStreamReader(new FileInputStream(fileName));
+                InputStreamReader isr = new InputStreamReader(new FileInputStream(bc3FileToProcess));
                 String codificacion = isr.getEncoding();
                 isr.close();
                 
-                BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream (fileName), codificacion));
+                BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream (bc3FileToProcess), codificacion));
                 // BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(fileName), "Cp1252"));
                 // Alternativas: 850 ("Cp850") DOS | 437 ("Cp437") DOS-US
                 
@@ -114,15 +114,13 @@ public class BC3File {
                 if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Iniciando la lectura...");
                 
                 // <editor-fold defaultstate="expanded" desc=" Lectura línea a línea del archivo BC3 "> // http://wiki.netbeans.org/SurroundWithCodeFolding
-                
                 while ((lineaLeida = br.readLine()) != null) {
                     // realmente el separador de conceptos en el formato BC3 es el carácter '~' (ASCII 126)
-                    // este carácter se ha almacenado en ConstantesTexto.inicioConcepto
                     // se deben ir añadiendo líneas al registro hasta que se encuentre el carácter '~' de nuevo
-
+                    
                     numLineaLeida++;
                     if (lineaLeida.length() > 1) {
-                        if(String.valueOf(lineaLeida.charAt(0)).contains(ConstantesTexto.inicioConcepto)) {
+                        if(String.valueOf(lineaLeida.charAt(0)).equals(ConstantesTexto.inicioConcepto)) {
                             procesar = true;
                         } else {
                             sb.append(lineaLeida);
@@ -131,6 +129,10 @@ public class BC3File {
                         sb.append(lineaLeida);
                     }
                     
+                    // comprobación inicial de que el archivo tiene el formato
+                    // BC3 (los dos primeros bytes deben ser "~V")
+                    if (numLineaLeida == 1 && !(lineaLeida.substring(0, 2).equals("~V"))) throw new ErrorInFormatException(""
+                                + "El archivo de origen no parece que tenga el formato BC3 adecuado.");
                     
                     if (procesar) {
                         String[] datosLinea;
@@ -198,13 +200,13 @@ public class BC3File {
                         sb.append(lineaLeida);
                         procesar = false;
                     }
-                }
+                } // final de la ectura del archivo bc3
                 // </editor-fold>
                 
                 if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Lectura finalizada.");
                 
                 t1 = System.nanoTime();
-                tt = (t1 - t0) / 1000000000l;
+                tt = (t1 - t0) / 1000000l;  // duración en milisegundos
                 
                 
                 br.close();
@@ -212,7 +214,7 @@ public class BC3File {
                     StringBuilder statistics = new StringBuilder();
                     
                     statistics.append("ESTADÍSTICAS:\n");
-                    statistics.append("El proceso de lectura ha durado ").append(String.format("%2.4f", tt)).append(" segundos.\n");
+                    statistics.append("El proceso de lectura ha durado ").append(String.format("%2.3f", tt)).append(" ms.\n");
                     statistics.append("  Líneas leídas: ").append(numLineaLeida).append(".\n");
                     statistics.append("    ").append(rCodigos.size()).append(" conceptos.\n");
                     statistics.append("    ").append(rDescompuestos.size()).append(" registros de descomposición.\n");
@@ -226,29 +228,29 @@ public class BC3File {
                 }
                 
             } catch (FileNotFoundException ex) {
-                System.out.println("El archivo " + fileName + " no se encuentra.");
+                System.out.println("El archivo " + bc3FileToProcess + " no se encuentra.");
             } catch (IOException ex) {
-                System.out.println("El archivo " + fileName + " no se puede leer.");
+                System.out.println("El archivo " + bc3FileToProcess + " no se puede leer.");
             } catch (ArrayIndexOutOfBoundsException ex){
                 System.out.println("Se ha producido un error en los límites de la matriz... ¿de cuál? " + ex.getCause().getMessage());
             }
-        }
         
-        // <editor-fold defaultstate="expanded" desc=" lectura línea a línea del archivo html ">
-        String plantillaHTML = "";
-        if (!LineaComandos.usarPlantillaExterna) {
-            plantillaHTML = "/org/ph/htmlFormat/mainTemplate.html";
-        } else {
-            System.out.println("Opción de utilización de plantilla externa no implementada. Utilizando plantilla por defecto.");
-            plantillaHTML = "/org/ph/htmlFormat/mainTemplate.html";
-        }
+        
+        // <editor-fold defaultstate="expanded" desc=" lectura línea a línea del archivo html de plantilla">
+            String plantillaHTML;
+            if (!LineaComandos.usarPlantillaExterna) {
+                plantillaHTML = "/org/ph/htmlFormat/mainTemplate.html";
+            } else {
+                System.out.println("Opción de utilización de plantilla externa no implementada. Utilizando plantilla por defecto.");
+                plantillaHTML = "/org/ph/htmlFormat/mainTemplate.html";
+            }
 
-        InputStream is = this.getClass().getResourceAsStream(plantillaHTML);
-        
-        conversion = generaHTML(is);
+            InputStream is = this.getClass().getResourceAsStream(plantillaHTML);
+
+            conversion = generaHTML(is);
         
         // </editor-fold>
-        
+        }
 //        conversion = true;
         return conversion;
     }
@@ -279,38 +281,38 @@ public class BC3File {
      */
     private void procesa_K (String[] linea) {
         rCoeficientes = new Registro_K_coeficientes(linea);
-        if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Registro de coeficientes procesado.");
-        if (LineaComandos.modoVerbose) {
-            System.out.println("DN: " + rCoeficientes.getDN());
-            System.out.println("DD: " + rCoeficientes.getDD());
-            System.out.println("DS: " + rCoeficientes.getDS());
-            System.out.println("DR: " + rCoeficientes.getDR());
-            System.out.println("DI: " + rCoeficientes.getDI());
-            System.out.println("DP: " + rCoeficientes.getDP());
-            System.out.println("DC: " + rCoeficientes.getDC());
-            System.out.println("DM: " + rCoeficientes.getDM());
-            System.out.println("DIVISA: " + rCoeficientes.getDIVISA ());
-
-            System.out.println("CI: " + rCoeficientes.getCI());
-            System.out.println("GG: " + rCoeficientes.getGG());
-            System.out.println("BI: " + rCoeficientes.getBI());
-            System.out.println("BAJA: " + rCoeficientes.getBAJA());
-            System.out.println("IVA: " + rCoeficientes.getIVA());
-            System.out.println("DRC: " + rCoeficientes.getDRC());
-
-            System.out.println("DCP: " + rCoeficientes.getDCP());
-            System.out.println("DFS: " + rCoeficientes.getDFS());
-            System.out.println("DRS: " + rCoeficientes.getDRS());
-
-            System.out.println("DUO: " + rCoeficientes.getDUO());
-            System.out.println("DII: " + rCoeficientes.getDII());
-            System.out.println("DES: " + rCoeficientes.getDES());
-            System.out.println("DNM: " + rCoeficientes.getDNM());
-            System.out.println("DDM: " + rCoeficientes.getDDM());
-            System.out.println("DSM: " + rCoeficientes.getDSM());
-            System.out.println("DSP: " + rCoeficientes.getDSP());
-            System.out.println("DEC: " + rCoeficientes.getDEC());
-            System.out.println("DIVISA2: " + rCoeficientes.getDIVISA2());
+        if (LineaComandos.modoVerbose)          System.out.println("Registro de coeficientes procesado.");
+        if (LineaComandos.mantenerArchivoLog)   {
+            log.appendTimedLogLine("DN: "       + rCoeficientes.getDN());
+            log.appendTimedLogLine("DD: "       + rCoeficientes.getDD());
+            log.appendTimedLogLine("DS: "       + rCoeficientes.getDS());
+            log.appendTimedLogLine("DR: "       + rCoeficientes.getDR());
+            log.appendTimedLogLine("DI: "       + rCoeficientes.getDI());
+            log.appendTimedLogLine("DP: "       + rCoeficientes.getDP());
+            log.appendTimedLogLine("DC: "       + rCoeficientes.getDC());
+            log.appendTimedLogLine("DM: "       + rCoeficientes.getDM());
+            log.appendTimedLogLine("DIVISA: "   + rCoeficientes.getDIVISA ());
+            
+            log.appendTimedLogLine("CI: "       + rCoeficientes.getCI());
+            log.appendTimedLogLine("GG: "       + rCoeficientes.getGG());
+            log.appendTimedLogLine("BI: "       + rCoeficientes.getBI());
+            log.appendTimedLogLine("BAJA: "     + rCoeficientes.getBAJA());
+            log.appendTimedLogLine("IVA: "      + rCoeficientes.getIVA());
+            log.appendTimedLogLine("DRC: "      + rCoeficientes.getDRC());
+            
+            log.appendTimedLogLine("DCP: "      + rCoeficientes.getDCP());
+            log.appendTimedLogLine("DFS: "      + rCoeficientes.getDFS());
+            log.appendTimedLogLine("DRS: "      + rCoeficientes.getDRS());
+            
+            log.appendTimedLogLine("DUO: "      + rCoeficientes.getDUO());
+            log.appendTimedLogLine("DII: "      + rCoeficientes.getDII());
+            log.appendTimedLogLine("DES: "      + rCoeficientes.getDES());
+            log.appendTimedLogLine("DNM: "      + rCoeficientes.getDNM());
+            log.appendTimedLogLine("DDM: "      + rCoeficientes.getDDM());
+            log.appendTimedLogLine("DSM: "      + rCoeficientes.getDSM());
+            log.appendTimedLogLine("DSP: "      + rCoeficientes.getDSP());
+            log.appendTimedLogLine("DEC: "      + rCoeficientes.getDEC());
+            log.appendTimedLogLine("DIVISA2: "  + rCoeficientes.getDIVISA2());
         }
     }
     
@@ -405,7 +407,24 @@ public class BC3File {
 //        }
     }
     
-    private boolean generaHTML (InputStream plantilla) {
+    /**
+     * Método que genera el archivo HTML a partir de un archivo de plantilla.
+     * Depende de la librería <a href="https://jsoup.org">jsoup</a>.
+     * @param plantilla <code>InputStream</code> El archivo de plantilla a utilizar
+     * @return <code>true</code> en caso de que la generación se realice correctamente y <code>false</code> en caso contrario.
+     */
+    private boolean generaHTML (InputStream plantilla) throws ErrorInFormatException {
+        try {
+            // Implementar el uso de jsoup
+            Document archivoHtml = Jsoup.parse(plantilla, "UTF-8", "http://www.google.com");
+            if(LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Documento de plantilla analizado correctamente.");
+        } catch (IOException ex) {
+            String er = "Error: " + ex.getLocalizedMessage();
+            log.appendTimedLogLine(er);
+            System.out.println(er);
+            throw new ErrorInFormatException("Error en el análisis del archivo de plantilla.");
+        }
+        
         boolean trabajoRealizadoOK = false;
         try {
             BufferedReader br   = new BufferedReader(new InputStreamReader(plantilla));
@@ -431,12 +450,17 @@ public class BC3File {
                     boolean raiz = false;
                     for (int i = 0; i < rCodigos.size(); i++) {
                         if(rCodigos.get(i).getCodigo().contains("#")) {                     // se trata de un capítulo
-                            if (rCodigos.get(i).getCodigo().contains("##")) raiz = true;    // código o capítulo raíz
+                            if (rCodigos.get(i).getCodigo().contains("##")) {
+                                raiz = true;    // código o capítulo raíz
+//                                System.out.println("Código: " + rCodigos.get(i).getCodigo()); // testing purposes
+//                                System.out.println("Resumen: " + rCodigos.get(i).getResumen());
+                            }
                                 
                             
-                            lineaLeida = lineaLeida.replace("{$codigo}", "<b>" + rCodigos.get(i).getCodigo().replace("#", "") + "</b>");
+                            lineaLeida = lineaLeida.replace("{$codigo}", "<b>" + rCodigos.get(i).getCodigo().replace("#", "") + "</b>")
+                                    .replace("{$resumen}", "<b>" + rCodigos.get(i).getResumen() + "</b>");
                             lineaLeida = lineaLeida.replace("{$ud}", "");
-                            lineaLeida = lineaLeida.replace("{$resumen}", "<b>" + rCodigos.get(i).getResumen() + "</b>");
+//                            lineaLeida = lineaLeida.replace("{$resumen}", "<b>" + rCodigos.get(i).getResumen() + "</b>");
                             lineaLeida = lineaLeida.replace("{$n}", "");
                             lineaLeida = lineaLeida.replace("{$longitud}", "");
                             lineaLeida = lineaLeida.replace("{$anchura}", "");
@@ -472,7 +496,7 @@ public class BC3File {
                 lineaLeida = "";
             }
             
-            String archivoHtmlSalida = getHtmlFileName(fileName) + ".html";
+            String archivoHtmlSalida = getHtmlFileName(bc3FileToProcess) + ".html";
 //            System.out.println("El archivo HTML se llamará... \"" + archivoHtmlSalida + "\"");
             
             

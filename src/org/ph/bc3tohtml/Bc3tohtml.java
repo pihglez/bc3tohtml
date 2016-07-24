@@ -27,6 +27,7 @@ import org.ph.System.FileManage;
 import org.ph.System.SystemProperties;
 import org.ph.bc3tohtml.help.Ayuda;
 import org.ph.errors.ErrorInArgumentsException;
+import org.ph.errors.ErrorInFormatException;
 
 /**
  *
@@ -133,24 +134,6 @@ public class Bc3tohtml {
                 archivoBase + ".html" ;
     }
     
-//    /**
-//     * Este método busca ocurrencias de una determinada cadena
-//     * @param args String[] La matriz de cadenas en la que buscar ocurrencias
-//     * @param searched String La cadena a buscar
-//     * @return boolean El método devuelve true si se encuentran coincidencias y false en cualquier otro caso.
-//     */
-//    private static boolean lookForAnswerInArrayNoCaseSensitive(String[] args, String searched){
-//        boolean ret = false;
-//        
-//        for (String arg : args) {
-//            if (arg.equalsIgnoreCase(searched)) {
-//                ret = true;
-//                break;
-//            }
-//        }
-//        return ret;
-//    }
-    
     /**
      * Este método establece las opciones reconocibles a través de la línea de comandos.
      */
@@ -253,10 +236,15 @@ public class Bc3tohtml {
             }
             
             // se cumplen las condiciones --> se realiza el proceso del archivo .bc3
-//            System.out.println("Archivo de entrada: " + LineaComandos.nombreArchivoAProcesar);
-//            System.out.println("Archivo de salida: " + LineaComandos.nombreArchivoSalida);
+            System.out.println("Procesando archivo " + LineaComandos.nombreArchivoAProcesar +
+                    " --> " + LineaComandos.nombreArchivoSalida);
             
-        } catch (ErrorInArgumentsException ex) {
+            BC3File bc3f = new BC3File(LineaComandos.nombreArchivoAProcesar);
+            if (bc3f.procesaBC3()) {
+                System.out.println("Proceso finalizado correctamente.");
+                System.out.println("Archivo de salida: " + LineaComandos.nombreArchivoSalida);
+            }
+        } catch (ErrorInFormatException|ErrorInArgumentsException ex) {
             System.out.println("Error irrecuperable: " + ex.getMessage());
         }
     }
@@ -283,27 +271,20 @@ public class Bc3tohtml {
         if(cmd.hasOption("f")){
             LineaComandos.nombreArchivoAProcesar    = cmd.getOptionValue("f");
             
-            LineaComandos.nombreArchivoSalida       =(cmd.hasOption("o"))      ?
-                                                      cmd.getOptionValue("o")   : 
+            LineaComandos.nombreArchivoSalida       =(cmd.hasOption("o"))    ?
+                                                      cmd.getOptionValue("o"):
                                                       setNombreArchivoSalida(LineaComandos.nombreArchivoAProcesar);
-//            System.out.println("opcion 'o': " + opciones.hasOption("o"));
-//            System.out.println("base:       " + LineaComandos.nombreArchivoAProcesar);
-//            System.out.println("salida:     " + setNombreArchivoSalida(LineaComandos.nombreArchivoAProcesar));
-//            System.out.println("real:       " + LineaComandos.nombreArchivoSalida);
-//            if(opciones.hasOption("o")) {
-//                LineaComandos.nombreArchivoSalida   = cmd.getOptionValue("o");
-//            } else {
-//                LineaComandos.nombreArchivoSalida   = setNombreArchivoSalida(LineaComandos.nombreArchivoAProcesar);
-//            }
+
             LineaComandos.nombrarArchivoSalida      = true;
             
             LineaComandos.mostrarEstadisticas       = cmd.hasOption("s");
             LineaComandos.modoVerbose               = cmd.hasOption("w");
             
-            LineaComandos.usarPlantillaExterna      = cmd.hasOption("t");
-            if(LineaComandos.usarPlantillaExterna) {
-                // implementar uso de plantilla externa
-            }
+//            // implementar uso de plantilla externa
+//            LineaComandos.usarPlantillaExterna      = cmd.hasOption("t");
+//            if(LineaComandos.usarPlantillaExterna) {
+//                // Trabajo a realizar
+//            }
             
             LineaComandos.salidaApresupuestoCiego   = cmd.hasOption("b");
             LineaComandos.salidaSoloDescompuestos   = cmd.hasOption("d");
@@ -312,10 +293,11 @@ public class Bc3tohtml {
             LineaComandos.incluirResumen            = cmd.hasOption("r");
             LineaComandos.incluirPresupuesto        = cmd.hasOption("p");
             
-            LineaComandos.mantenerArchivoLog        = cmd.hasOption("l");
-            if(LineaComandos.mantenerArchivoLog){
-                // implementar uso de archivo log
-            }
+//            // implementar mantenimiento de archivo log
+//            LineaComandos.mantenerArchivoLog        = cmd.hasOption("l");
+//            if(LineaComandos.mantenerArchivoLog){
+//                // implementar uso de archivo log
+//            }
             
             LineaComandos.asumirRespuestaPositiva   = cmd.hasOption("y");
             
