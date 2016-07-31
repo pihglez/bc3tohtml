@@ -23,7 +23,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.ph.System.FileManage;
-//import org.ph.System.RandomGenerator;
 import org.ph.System.SystemProperties;
 import org.ph.bc3tohtml.help.Ayuda;
 import org.ph.errors.ErrorInArgumentsException;
@@ -37,8 +36,14 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v.0.3.6.5";
+    public static final String  BC3TOHTMLVERSION    = "v.0.3.7.0";
+    /**
+     * En esta constante se almacena el nombre original del software
+     */
     public static final String  APPNAME             = "bc3tohtml";
+    /**
+     * Opciones de la línea de comandos.
+     */
     private static Options opciones;
 
     /**
@@ -60,14 +65,7 @@ public class Bc3tohtml {
      * @throws ErrorInArgumentsException Error irrecuperable en la introducción de comandos por parte del usuario
      */
     private static void testArgs(String[] args) throws ErrorInArgumentsException {
-        // antes de comenzar con la ejecución, deberían procesarse antes todos los
-        // switches con el objetivo de saber, por ejemplo, si se emplea el modificador
-        // -y, el -l o el -v
-//        LineaComandos.asumirRespuestaPositiva   = lookForAnswerInArrayNoCaseSensitive(args, "-y");
-//        LineaComandos.modoVerbose               = lookForAnswerInArrayNoCaseSensitive(args, "-v");
-//        LineaComandos.mantenerArchivoLog        = lookForAnswerInArrayNoCaseSensitive(args, "-l");
         
-//        CommandLineParser parser = new DefaultParser();
         try {
             CommandLine cmd = new DefaultParser().parse(opciones, args);
             switch (args.length) {
@@ -141,7 +139,7 @@ public class Bc3tohtml {
         opciones.addOption("?", false,  "Muestra esta ayuda");                                                      // ayuda
         opciones.addOption("b", false,  "Genera un presupuesto ciego (sin precios ni importes)");                   // presupuesto ciego
         opciones.addOption("d", false,  "Genera un documento sólo con los precios descompuestos");                  // solo descompuestos
-        opciones.addOption("e", false,  "Genera un documento sólo con los precios elementales");                    // solo elementales
+        opciones.addOption("e", false,  "Genera un documento sólo con las entidades de la BBDD");                   // solo elementales
         opciones.addOption("f", true,   "Especifica a continuación el archivo de entrada (.bc3)");                  // archivo (file) de entrada
         opciones.addOption("l", true,   "Especifica a continuación el archivo de volcado (.log)");                  // archivo (log) de volcado
         opciones.addOption("m", false,  "Incluye las mediciones en el presupuesto");                                // incluir mediciones
@@ -155,6 +153,7 @@ public class Bc3tohtml {
         opciones.addOption("y", false,  "Asume una respuesta positiva a las posibles preguntas");                   // asumir sí (yes) a cualquier pregunta
         opciones.addOption("z", false,  "Muestra la licencia del software");                                        // muestra la licencia
         opciones.addOption("i", false,  "Muestra información del sistema");                                         // muestra información del sistema
+        opciones.addOption("c", false,  "Fuerza la lectura de archivos en codificación Windows\"Cp1252\"");         // fuerza lectura archivo bc3 codificación Windows Cp1252
     }
     
     /**
@@ -208,8 +207,6 @@ public class Bc3tohtml {
     }
     
     private static void procesarArchivo() {
-        // procesar las variables para ver si es posible analizar el archivo y guardar
-        // los resultados
         try {
             // el archivo de entrada debe existir y ser accesible
             if (!(FileManage.isFileAvailable(LineaComandos.nombreArchivoAProcesar))) {
@@ -301,6 +298,7 @@ public class Bc3tohtml {
             
             LineaComandos.asumirRespuestaPositiva   = cmd.hasOption("y");
             
+            LineaComandos.forzarCodificacionWindows = cmd.hasOption("c");
             procesarArchivo();
         }
     }

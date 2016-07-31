@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <html>
     <head>
-        <title>presupuesto :: {$presupuesto}</title>
+        <title id="titulo-documento"></title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <!-- http://purecss.io -->
@@ -70,6 +70,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             .pure-table-bordered tbody>tr:last-child>td{border-bottom-width:0}
             .pure-table-horizontal td,.pure-table-horizontal th{border-width:0 0 1px;border-bottom:1px solid #cbcbcb}
             .pure-table-horizontal tbody>tr:last-child>td{border-bottom-width:0}
+            .ph-cell-up-align {vertical-align: top}
+            .ph-cell-down-align{vertical-align: bottom}
             
             .ph-width-cod{witdth: 8.4%;}
             .ph-width-ud{witdth: 2.7%;}
@@ -78,7 +80,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             .ph-width-num{witdth: 6.4%;}
             .ph-width-parcial{witdth: 11.2%;}
             
-            .ph-data {text-align: right;}
+            .ph-data {text-align: right; vertical-align: bottom}
             
             .ph-hidden {visibility: hidden;}
         </style>
@@ -87,21 +89,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </script>
     </head>
     <body>
-        <div class="pure-menu pure-menu-horizontal">
-            <a href="#" class="pure-menu-heading pure-menu-link">PRES</a>
+        <div class="pure-menu pure-menu-horizontal" id="div-menu-horizontal">
+            <a href="#encabezado-principal" class="pure-menu-heading pure-menu-link" id="btn-pres">PRES</a>
             <ul class="pure-menu-list">
-                <li class="pure-menu-item ph-hidden"><a href="#" class="pure-menu-link">Presupuesto</a></li>
-                <li class="pure-menu-item ph-hidden"><a href="#" class="pure-menu-link">Descompuestos</a></li>
-                <li class="pure-menu-item ph-hidden"><a href="#" class="pure-menu-link">Elementales</a></li>
-                <li class="pure-menu-item">{$propiedadArchivo}</li>
+                <li class="pure-menu-item ph-hidden" id="menu-pres"><a href="#" class="pure-menu-link">Presupuesto</a></li>
+                <li class="pure-menu-item ph-hidden" id="menu-desc"><a href="#" class="pure-menu-link">Descompuestos</a></li>
+                <li class="pure-menu-item ph-hidden" id="menu-elem"><a href="#" class="pure-menu-link">Elementales</a></li>
+                <li class="pure-menu-item" id="propiedad-archivo"></li>
             </ul>
         </div>
-        <div>
-            <table width="100%" class="pure-table pure-table-horizontal pure-table-striped">
+        <div id="id-presupuesto">
+            <table width="100%" class="pure-table pure-table-horizontal pure-table-striped" id="tabla-presupuesto">
                 <thead>
-                    <tr><h1>Presupuesto</h1></tr>
                     <tr>
-                        <th class="ph-width-cod" id="codigo">Código</th>
+                        <h1 id="encabezado-principal">Presupuesto</h1>
+                    </tr>
+                    <tr>
+                        <th class="ph-width-cod" id="codigo">Codigo</th>
                         <th class="ph-width-ud" id="ud">Ud</th>
                         <th width="35.1%" id="resumen">Resumen</th>
                         <th class="ph-width-n" id="n">N</th>
@@ -116,17 +120,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </thead>
                 <tbody id="cuerpotabla">
                     <tr class="" id="filadatos">
-                        <td id="codigo_0">{$codigo}</td>
-                        <td id="ud_0">{$ud}</td>
-                        <td id="resumen_0">{$resumen}</td>
-                        <td id="n_0">{$n}</td>
-                        <td class="ph-data" id="longitud_0">{$longitud}</td>
-                        <td class="ph-data" id="anchura_0">{$anchura}</td>
-                        <td class="ph-data" id="altura_0">{$altura}</td>
-                        <td class="ph-data" id="parcial_0">{$parcial}</td>
-                        <td class="ph-data" id="canpres_0">{$canpres}</td>
-                        <td class="ph-data" id="prpres_0">{$prpres}</td>
-                        <td class="ph-data" id="imppres_0">{$imppres}</td>
+                        <td class="ph-cell-up-align" id="codigo_0"></td>
+                        <td class="ph-cell-up-align" id="ud_0"></td>
+                        <td class="ph-cell-up-align" id="resumen_0"></td>
+                        <td id="n_0"></td>
+                        <td class="ph-data" id="longitud_0"></td>
+                        <td class="ph-data" id="anchura_0"></td>
+                        <td class="ph-data" id="altura_0"></td>
+                        <td class="ph-data" id="parcial_0"></td>
+                        <td class="ph-data" id="canpres_0"></td>
+                        <td class="ph-data" id="prpres_0"></td>
+                        <td class="ph-data" id="imppres_0"></td>
                     </tr>
                 </tbody>
                 <tfoot></tfoot>

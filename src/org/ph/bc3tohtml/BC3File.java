@@ -25,14 +25,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.ph.System.FileManage;
+import org.ph.bc3Format.CodigosHijos;
 import org.ph.bc3Format.ConstantesTexto;
 import org.ph.bc3Format.Registro_C_concepto;
 import org.ph.bc3Format.Registro_D_descomposicion;
@@ -67,15 +66,11 @@ public class BC3File {
     
     /**
      * Archivo a leer
-     * @param fileName ruta del archivo a leer
+     * @param fileName <code>String</code> ruta del archivo a leer
      */
     public BC3File (String fileName) {
         this.bc3FileToProcess = fileName;
     }
-    
-//    public  boolean inspect() {
-//        return FileManage.isFileAvailable(bc3FileToProcess);
-//    }
     
     public boolean procesaBC3() throws ErrorInFormatException {
         if (LineaComandos.mantenerArchivoLog) log = new Bc3ParserLogger();
@@ -87,10 +82,19 @@ public class BC3File {
                 int numLineaLeida = 0;  // Número de línea leída
 //                boolean mostrarLineas = false; int mLdesde = 1090, mLhasta = 1100; // para bucle de control
                 
-                // primero averiguamos la codificación del archivo
-                InputStreamReader isr = new InputStreamReader(new FileInputStream(bc3FileToProcess));
-                String codificacion = isr.getEncoding();
-                isr.close();
+                // primero averiguamos la codificación del archivo a no ser que se fuerce codificación Cp1252
+                String codificacion;
+                if (!LineaComandos.forzarCodificacionWindows) {
+                    InputStreamReader isr = new InputStreamReader(new FileInputStream(bc3FileToProcess));
+                    codificacion = isr.getEncoding();
+                    if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Detectada codificación '" + codificacion + "'");
+                    if (LineaComandos.modoVerbose) System.out.println("Codificación detectada: " + codificacion);
+                    isr.close();
+                } else {
+                    codificacion = "Cp1252";
+                    if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Forzando lectura de archivo BC3 en '" + codificacion + "'");
+                    if (LineaComandos.modoVerbose) System.out.println("Codificación forzada: " + codificacion);
+                }
                 
                 BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream (bc3FileToProcess), codificacion));
                 // BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(fileName), "Cp1252"));
@@ -236,7 +240,7 @@ public class BC3File {
             }
         
         
-        // <editor-fold defaultstate="expanded" desc=" lectura línea a línea del archivo html de plantilla">
+        // <editor-fold defaultstate="expanded" desc=" lectura del archivo html de plantilla">
             String plantillaHTML;
             if (!LineaComandos.usarPlantillaExterna) {
                 plantillaHTML = "/org/ph/htmlFormat/mainTemplate.html";
@@ -323,16 +327,6 @@ public class BC3File {
     private void procesa_C (String[] linea) {
         try {
             rCodigos.add(new Registro_C_concepto(linea));
-//        if (rCodigos.size() == 1) {
-//            // imprimir por pantalla la primera ocurrencia
-//            System.out.println("Código: "   + rCodigos.get(0).getCodigo());
-//            System.out.println("Código2: "  + rCodigos.get(0).getCodigo2());
-//            System.out.println("Tipo: "     + rCodigos.get(0).getTipo());
-//            System.out.println("Unidad: "   + rCodigos.get(0).getUnidad());
-//            System.out.println("Resumen: "  + rCodigos.get(0).getResumen());
-//            System.out.println("Fecha: "    + rCodigos.get(0).getFecha());
-//            System.out.println("Precio: "   + rCodigos.get(0).getPrecio());
-//        }
         } catch (ParseException ex) {
             if (LineaComandos.modoVerbose) System.out.println("Error: " + ex.getMessage());
         }
@@ -340,71 +334,26 @@ public class BC3File {
     
     private void procesa_D (String[] linea) {
         rDescompuestos.add(new Registro_D_descomposicion(linea));
-        
-//        if (rDescompuestos.size() == 1) {
-//            System.out.println("Código padre             : " + rDescompuestos.get(0).getCodigoPadre());
-//            System.out.println("Número de hijos          : " + rDescompuestos.get(0).getCodigosHijos().size());
-//            System.out.println("Código hijo              : " + rDescompuestos.get(0).getCodigosHijos().get(4).getCodigoHijo());
-//            System.out.println("Código hijo - factor     : " + rDescompuestos.get(0).getCodigosHijos().get(4).getFactor());
-//            System.out.println("Código hijo - rendimiento: " + rDescompuestos.get(0).getCodigosHijos().get(4).getRendimiento());
-//        }
     }
     
     private void procesa_T (String[] linea) {
         rTextos.add(new Registro_T_texto(linea));
-        
-//        if (rTextos.size() == 1) {
-//            System.out.println("código: " + rTextos.get(0).getCodigoConcepto());
-//            System.out.println("============TEXTO============\n" + rTextos.get(0).getTextoDescriptivo());
-//        }
-        
     }
     
     private void procesa_M (String[] linea) {
         rMediciones.add(new Registro_M_mediciones(linea));
-        
-//        if (rMediciones.size() == 1) {
-//            System.out.println("Se procesa...");
-//            System.out.println("Código padre  : " + rMediciones.get(0).getCodigoPadre());
-//            System.out.println("Código hijo   : " + rMediciones.get(0).getCodigoHijo());
-//            System.out.println("Medición total: " + rMediciones.get(0).getMedicionTotal());
-//            System.out.println("Etiqueta      : " + rMediciones.get(0).getEtiqueta());
-//            System.out.println("Posición      : " + rMediciones.get(0).getPosicion()[0]);
-//            System.out.print("Línea         : " + rMediciones.get(0).getMediciones().get(0).getUnidades());
-//            System.out.print("\t" + rMediciones.get(0).getMediciones().get(0).getLatitud());
-//            System.out.print("\t" + rMediciones.get(0).getMediciones().get(0).getLongitud());
-//            System.out.println("\t" + rMediciones.get(0).getMediciones().get(0).getAltura());
-//        }
     }
     
     private void procesa_L (String [] linea) {
         rPliegos.add(new Registro_L_pliegos(linea));
-        
-//        if (rPliegos.size() == 1) {
-//            System.out.println("Código del concepto del pliego: " + rPliegos.get(0).getCodigo_concepto());
-//            System.out.println("Código de sección del pliego: " + rPliegos.get(0).getSeccionesPliego().get(0).getCodigo_seccion_pliego());
-//            System.out.println("Texto de la sección del pliego: " + rPliegos.get(0).getSeccionesPliego().get(0).getTexto_seccion_pliego());
-//            System.out.println("Archivo RTF: " + rPliegos.get(0).getArchivo_texto_rtf());
-//            System.out.println("Archivo HTM: " + rPliegos.get(0).getArchivo_texto_htm());
-//        }
     }
     
     private void procesa_G (String [] linea) {
         rInformaGrafica.add(new Registro_G_informacionGrafica(linea));
-        
-//        if (rInformaGrafica.size() == 1) {
-//            System.out.println("Código     : " + rInformaGrafica.get(0).getCodigo_concepto());
-//            System.out.println("Información: " + rInformaGrafica.get(0).getInformacionGrafica().get(0));
-//            System.out.println("URL externa: " + rInformaGrafica.get(0).getUrl_ext());
-//        }
     }
     
     private void procesa_E (String[] linea) {
         rEntidades.add(new Registro_E_entidad(linea));
-        
-//        if (rEntidades.size() == 1) {
-//            if (rEntidades.size() > 33) System.out.print("Código de entidad: " + rEntidades.get(rEntidades.size() - 1).getCodigo_entidad() + " ");
-//        }
     }
     
     /**
@@ -414,109 +363,170 @@ public class BC3File {
      * @return <code>true</code> en caso de que la generación se realice correctamente y <code>false</code> en caso contrario.
      */
     private boolean generaHTML (InputStream plantilla) throws ErrorInFormatException {
+        boolean trabajoRealizadoOK = false;
         try {
-            // Implementar el uso de jsoup
+            // Implementación del uso de jsoup
             Document archivoHtml = Jsoup.parse(plantilla, "UTF-8", "http://www.google.com");
             if(LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Documento de plantilla analizado correctamente.");
+            
+            // elementos comunes
+            Element tituloDocumento = archivoHtml.getElementById("titulo-documento");
+            String tituloBBDD = getTituloBBDD();
+            tituloDocumento.text("bc3tohtml :: " + tituloBBDD);
+            Element propiedadDocumento = archivoHtml.getElementById("propiedad-archivo");
+            propiedadDocumento.appendText(rPropiedad.getPROPIEDAD_ARCHIVO());
+            
+            Element encabezado = archivoHtml.getElementById("encabezado-principal");
+            
+            Element cuerpoTabla = archivoHtml.getElementById("cuerpotabla");
+            Element filaDatos   = archivoHtml.getElementById("filadatos");
+            Element nuevaFilaDatos, dato;
+            
+            if (LineaComandos.incluirResumen || LineaComandos.incluirPresupuesto || LineaComandos.salidaSoloDescompuestos) {
+                if (!LineaComandos.salidaConMediciones) {
+                    dato = archivoHtml.getElementById("n");
+                    dato.text("");
+                    dato = archivoHtml.getElementById("longitud");
+                    dato.text("");
+                    dato = archivoHtml.getElementById("anchura");
+                    dato.text("");
+                    dato = archivoHtml.getElementById("altura");
+                    dato.text("");
+                    dato = archivoHtml.getElementById("parcial");
+                    dato.text("");
+                    dato = archivoHtml.getElementById("resumen");
+                    dato.attr("width", "70%");
+                }
+                
+                for(Registro_C_concepto registro : rCodigos) {
+                    if(registro.getCodigo().contains("##")){                        // código raíz
+                        cuerpoTabla.prependChild(filaDatos.clone());
+                        
+                        nuevaFilaDatos = archivoHtml.getElementById("filadatos").firstElementSibling();
+                        dato = nuevaFilaDatos.getElementById("codigo_0");
+                        dato.append("<h3>" + registro.getCodigo().replace("##", "") + "</h3>");
+                        dato = nuevaFilaDatos.getElementById("resumen_0");
+                        dato.append("<h3>" + registro.getResumen() + "</h3>");
+                        if (!LineaComandos.salidaSoloDescompuestos) {
+                            dato = nuevaFilaDatos.getElementById("imppres_0");
+                            dato.append("<h3>" + String.format("%1$,.2f", registro.getPrecio()) + "</h3>");                // formato del número
+                        }
+                    }
+
+                    if(!(registro.getCodigo().contains("##")) && registro.getCodigo().contains("#")){   // capítulo normal
+                        cuerpoTabla.appendChild(filaDatos.clone());
+
+                        nuevaFilaDatos = archivoHtml.getElementById("filadatos").lastElementSibling();
+                        dato = nuevaFilaDatos.getElementById("codigo_0");
+                        dato.append("<h4>" + registro.getCodigo().replace("#", "") + "</h4>");
+                        dato = nuevaFilaDatos.getElementById("resumen_0");
+                        dato.append("<h4>" + registro.getResumen() + "</h4>");
+                        if (!LineaComandos.salidaSoloDescompuestos) {
+                            dato = nuevaFilaDatos.getElementById("imppres_0");
+                            dato.append("<h4>" + String.format("%1$,.2f", registro.getPrecio()) + "</h4>");
+                        }
+                        
+                        if(LineaComandos.incluirPresupuesto) {
+                            double rendimiento = 0d, precio = 0d, importe = 0d;
+                            StringBuilder sb = new StringBuilder();
+                            for (Registro_D_descomposicion desc : rDescompuestos) {
+                                if (desc.getCodigoPadre().equals(registro.getCodigo())) {   // coincide con el código padre
+                                    
+                                    for(CodigosHijos codigosHijo : desc.getCodigosHijos()) {
+                                        // se añaden los descompuestos
+                                        cuerpoTabla.appendChild(filaDatos.clone());
+                                        rendimiento = codigosHijo.getRendimiento();
+                                        precio      = getPrecioDeCodigo(codigosHijo.getCodigoHijo());
+                                        importe     = rendimiento * precio;
+
+                                        nuevaFilaDatos = archivoHtml.getElementById("filadatos").lastElementSibling();
+
+                                        dato = nuevaFilaDatos.getElementById("codigo_0");
+                                        dato.text(codigosHijo.getCodigoHijo());
+                                        
+                                        dato = nuevaFilaDatos.getElementById("ud_0");
+                                        dato.text(getUnidadDeCodigo(codigosHijo.getCodigoHijo()));
+                                        
+                                        dato = nuevaFilaDatos.getElementById("resumen_0");
+                                        dato.append("<strong>" + getResumenDeCodigo(codigosHijo.getCodigoHijo()) + "</strong>" + "".concat(
+                                                (sb.append(getTextoDeCodigo(codigosHijo.getCodigoHijo())).length() > 0) ?
+                                                        "<br/>" + sb.toString() :
+                                                        ""
+                                        ));
+                                        
+                                        dato = nuevaFilaDatos.getElementById("canpres_0");
+                                        dato.text(String.format("%1$,.2f", rendimiento));
+                                        
+                                        dato = nuevaFilaDatos.getElementById("prpres_0");
+                                        dato.text(String.format("%1$,.2f", precio));
+                                        
+                                        dato = nuevaFilaDatos.getElementById("imppres_0");
+                                        dato.text(String.format("%1$,.2f", importe));
+                                        sb.setLength(0);
+                                    }                                    
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if(LineaComandos.salidaSoloElementales && (rEntidades.size() > 0)) {
+                // TODO: habría que quitar u ocultar los encabezados
+                
+                encabezado.text("Entidades");
+                for(Registro_E_entidad registro : rEntidades) {
+                    cuerpoTabla.prependChild(filaDatos.clone());
+                        
+                    nuevaFilaDatos = archivoHtml.getElementById("filadatos").firstElementSibling();
+                    dato = nuevaFilaDatos.getElementById("codigo_0");
+                    dato.appendText(registro.getCodigo_entidad());
+                    dato = nuevaFilaDatos.getElementById("resumen_0");
+                    String entidad  = registro.getNombre()
+                                    + ((registro.getCif()   != null) ? "<br/>" + registro.getCif()    : "")
+                                    + ((registro.getNombre()!= null) ? "<br/>" + registro.getResumen(): "")
+                                    + ((registro.getWeb()   != null) ? "<br/>" + registro.getWeb()    : "")
+                                    + ((registro.getWeb()   != null) ? "<br/>" + registro.getEmail()  : "");
+                    dato.append(entidad);
+                    
+                    Element elemento;
+                    elemento = archivoHtml.getElementById("ud");
+                    elemento.text("");
+                    elemento = archivoHtml.getElementById("n");
+                    elemento.text("");
+                    elemento = archivoHtml.getElementById("longitud");
+                    elemento.text("");
+                    elemento = archivoHtml.getElementById("anchura");
+                    elemento.text("");
+                    elemento = archivoHtml.getElementById("altura");
+                    elemento.text("");
+                    elemento = archivoHtml.getElementById("parcial");
+                    elemento.text("");
+                    elemento = archivoHtml.getElementById("canpres");
+                    elemento.text("");
+                    elemento = archivoHtml.getElementById("prpres");
+                    elemento.text("");
+                    elemento = archivoHtml.getElementById("imppres");
+                    elemento.text("");
+                    elemento = archivoHtml.getElementById("resumen");
+                    elemento.attr("width", "80%");
+                }
+            }
+            
+            filaDatos.remove();
+            
+            
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(LineaComandos.nombreArchivoSalida), "UTF-8"));
+            writer.append(archivoHtml.outerHtml());
+            writer.close();
+            
+            trabajoRealizadoOK = true;
         } catch (IOException ex) {
             String er = "Error: " + ex.getLocalizedMessage();
             log.appendTimedLogLine(er);
             System.out.println(er);
             throw new ErrorInFormatException("Error en el análisis del archivo de plantilla.");
-        }
-        
-        boolean trabajoRealizadoOK = false;
-        try {
-            BufferedReader br   = new BufferedReader(new InputStreamReader(plantilla));
-            String lineaLeida;
-            StringBuilder sb    = new StringBuilder();                                      // el cojunto del html
-            StringBuilder st    = new StringBuilder();                                      // la estructura tabulada del presupuesto
-            
-            while ((lineaLeida = br.readLine()) != null) {
-                
-                if(lineaLeida.contains("{$propiedadArchivo}")) {
-                    lineaLeida = lineaLeida.replace("{$propiedadArchivo}", rPropiedad.getPROPIEDAD_ARCHIVO() + " :: " + rPropiedad.getVERSION_FORMATO() + ""
-                            + " :: " + rPropiedad.getPROGRAMA_EMISION());
-                    sb.append(lineaLeida);      // aquí se almacena el HTML -en principio-
-                    lineaLeida = "";
-                }
-                
-                
-                if(lineaLeida.contains("{$codigo}")) {                                      // aquí está la estructura tabulada
-                    String lineaLeidaOriginal = lineaLeida;
-                    
-//                    StringBuilder ll = new StringBuilder();
-//                    ll.append(lineaLeida);
-                    boolean raiz = false;
-                    for (int i = 0; i < rCodigos.size(); i++) {
-                        if(rCodigos.get(i).getCodigo().contains("#")) {                     // se trata de un capítulo
-                            if (rCodigos.get(i).getCodigo().contains("##")) {
-                                raiz = true;    // código o capítulo raíz
-//                                System.out.println("Código: " + rCodigos.get(i).getCodigo()); // testing purposes
-//                                System.out.println("Resumen: " + rCodigos.get(i).getResumen());
-                            }
-                                
-                            
-                            lineaLeida = lineaLeida.replace("{$codigo}", "<b>" + rCodigos.get(i).getCodigo().replace("#", "") + "</b>")
-                                    .replace("{$resumen}", "<b>" + rCodigos.get(i).getResumen() + "</b>");
-                            lineaLeida = lineaLeida.replace("{$ud}", "");
-//                            lineaLeida = lineaLeida.replace("{$resumen}", "<b>" + rCodigos.get(i).getResumen() + "</b>");
-                            lineaLeida = lineaLeida.replace("{$n}", "");
-                            lineaLeida = lineaLeida.replace("{$longitud}", "");
-                            lineaLeida = lineaLeida.replace("{$anchura}", "");
-                            lineaLeida = lineaLeida.replace("{$altura}", "");
-                            lineaLeida = lineaLeida.replace("{$parcial}", "");
-                            lineaLeida = lineaLeida.replace("{$canpres}", "");
-                            lineaLeida = lineaLeida.replace("{$prpres}", "");
-                            lineaLeida = lineaLeida.replace("{$imppres}", "<b>" + String.format("%1$,3.02f", rCodigos.get(i).getPrecio()) + "</b>");
-                            
-                        } else {
-//                            lineaLeida = lineaLeida.replace("{$codigo}", rCodigos.get(i).getCodigo());
-//                            lineaLeida = lineaLeida.replace("{$ud}", rCodigos.get(i).getUnidad());
-//                            lineaLeida = lineaLeida.replace("{$resumen}", rCodigos.get(i).getResumen());
-//                            lineaLeida = lineaLeida.replace("{$prpres}", String.format("%1$,3.02f", rCodigos.get(i).getPrecio()));
-                        }
-                        
-                        
-                        if (!lineaLeida.equals(lineaLeidaOriginal)){
-                            if (!raiz) st.append(lineaLeida + "</tr>\n<tr>"); else {
-                                // concepto raíz
-                                st.insert(0,lineaLeida + "</tr>\n<tr>");
-                                raiz = false;
-                            }
-                        }
-                        lineaLeida = lineaLeidaOriginal;
-                    }
-                    lineaLeida = "";
-                }
-                
-                sb.append(st);
-                sb.append(lineaLeida);
-                st.delete(0, st.length());
-                lineaLeida = "";
-            }
-            
-            String archivoHtmlSalida = getHtmlFileName(bc3FileToProcess) + ".html";
-//            System.out.println("El archivo HTML se llamará... \"" + archivoHtmlSalida + "\"");
-            
-            
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(archivoHtmlSalida), "UTF-8"));
-            
-            System.out.println("Escribiendo en " + archivoHtmlSalida + "...");
-            writer.append(sb);
-            writer.close();
-            System.out.println("Escritura finalizada correctamente.");
-            
-            trabajoRealizadoOK = true;
-        } catch (UnsupportedEncodingException ex) {
-            // la codificación no es la correcta
-            System.out.println("Error de codificación de plantilla.");
-        } catch (FileNotFoundException ex) {
-            // no se encuentra el archivo
-            System.out.println("No se encuentra el archivo de plantilla. \n" + ex.getLocalizedMessage());
-        } catch (IOException ex) {
-            // no se puede leer
-            System.out.println("Error de E/S con el archivo de plantilla.");
         }
         
         return trabajoRealizadoOK;
@@ -527,5 +537,71 @@ public class BC3File {
 //        String fn = fileName.substring(0, punto);
         
         return fileName.substring(0, punto);
+    }
+    
+    private String getTituloBBDD() {
+        String s = "";
+        for(Registro_C_concepto registro : rCodigos) {
+            if(registro.getCodigo().contains("##")){
+                s = registro.getResumen();
+                break;
+            }
+        }
+        return s;
+    }
+    
+    private String getTextoDeCodigo(String codigo) {
+        StringBuilder s = new StringBuilder();
+        for (Registro_T_texto rtt : rTextos) {
+            if (rtt.getCodigoConcepto().equals(codigo)) {
+                s.append(rtt.getTextoDescriptivo());
+                break;
+            }
+        }
+        return s.toString();
+    }
+    
+    private String getResumenDeCodigo(String codigo) {
+        String s = "";
+        for (Registro_C_concepto rcc : rCodigos){
+            if (codigo.equals(rcc.getCodigo())) {
+                s = rcc.getResumen();
+                break;
+            }
+        }
+        return s;
+    }
+    
+    private double getMedicionTotalDeCodigo(String codigo) {
+        double d = 0d;
+        for (Registro_M_mediciones med : rMediciones) {
+            if (codigo.equals(med.getCodigoPadre())) {
+                d = med.getMedicionTotal();
+                break;
+            }
+        }
+        return d;
+    }
+    
+    private double getPrecioDeCodigo(String codigo) {
+        double d = 0d;
+        for (Registro_C_concepto concepto : rCodigos) {
+            if(codigo.equals(concepto.getCodigo())) {
+                d = concepto.getPrecio();
+                break;
+            }
+        }
+        return d;
+    }
+    
+    private String getUnidadDeCodigo (String codigo) {
+        String s = "";
+        for (Registro_C_concepto rcc : rCodigos){
+            if (codigo.equals(rcc.getCodigo())) {
+                s = rcc.getUnidad();
+                break;
+            }
+        }
+        return s;
     }
 }

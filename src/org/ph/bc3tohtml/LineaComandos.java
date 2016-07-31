@@ -74,6 +74,10 @@ public class LineaComandos {
      */
     public static boolean incluirPresupuesto        = true;     // -p
     /**
+     * Fuerza la lectura del archivo BC3 en codificación Cp1252 (windows)
+     */
+    public static boolean forzarCodificacionWindows = false;    // -c
+    /**
      * Nombre de la plantilla html a utilizar (distinta de la de defecto)
      */
     public static String nombrePlantillaHtml;
