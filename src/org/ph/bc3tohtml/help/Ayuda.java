@@ -35,49 +35,12 @@ public class Ayuda {
     public static final String INFO = "\n" + Bc3tohtml.APPNAME + " " + Bc3tohtml.BC3TOHTMLVERSION + "\n"
             + "" + CREDITOS + "\n";
     
+    /**
+     * Información básica de uso del software
+     */
     public static final String DESCRIPCION = ""
             + "Este software transforma un archivo BC3 en uno HTML.\n"
             + "Uso: java -jar bc3tohtml archivo.bc3\n"
-            + "Esto generará como salida 'archivo.html', que podrá ser visualizado con un navegador web standard como Firefox, Opera, Internet Explorer o Safari.\n"
+            + "Esto generará como salida 'archivo.html', que podrá ser visualizado con un navegador web standard como Firefox, Opera, Internet Explorer o Safari.\n\n"
             + "Ejecute 'java -jar bc3tohtml -?' para una información más detallada.\n";
-    
-//////////    /**
-//////////     * Información detallada del funcionamiento del software
-//////////     */
-//////////    public static final String DETAILEDINFO = INFO + "\nUso avanzado y opciones largas:\n"
-//////////            + "   -?  muestra esta ayuda." + "\n"
-//////////            + "   -b  genera un presupuesto ciego (blind)." + "\n"
-////////////            + "   -i  muestra información del sistema." + "\n"
-////////////            + "   -c  " + "\n"
-//////////            + "   -d  sólo incluye en el archivo generado los precios descompuestos." + "\n"
-//////////            + "   -e  sólo incuye en el archivo generado los precios elementales." + "\n"
-//////////            + "   -f  establece el archivo (file, BC3) de entrada:" + "\n"
-//////////            + "       java -jar bc3tohtml -f archivo.bc3" + "\n"
-////////////            + "   -h  " + "\n"
-//////////            + "   -l  establece el archivo de volcado (log) en el que se guardará información" + "\n"
-//////////            + "       acerca del proceso de conversión:" + "\n"
-//////////            + "       java -jar bc3tohtml -f archivo.bc3 -l archivolog.log" + "\n"
-//////////            + "   -m  al realizar la conversión, incluye también las mediciones." + "\n"
-////////////            + "       Implica '-p'." + "\n"
-//////////            + "   -o  establece el archivo HTML de salida (output) en el que se guardará la información" + "\n"
-//////////            + "       contenida en el archivo BC3 de origen. En el caso de no especificarse, el archivo" + "\n"
-//////////            + "       de salida tendrá el mismo nombre que el de origen con la extensión '.html'" + "\n"
-//////////            + "       java -jar bc3tohtml -f archivo.bc3 -o nuevoarchivo.htm" + "\n"
-//////////            + "           generará nuevoarchivo.htm" + "\n"
-//////////            + "       java -jar bc3tohtml -f archivo.bc3" + "\n"
-//////////            + "           generará archivo.html" + "\n"
-//////////            + "   -p  sólo incluye en el archivo generado el presupuesto." + "\n"
-//////////            + "   -r  sólo incluye en el archivo generado el resumen del presupuesto." + "\n"
-//////////            + "   -s  muestra estadísticas (statistics) en pantalla al finalizar la conversión." + "\n"
-//////////            + "   -t  establece el archivo (template, HTML) de plantilla para la conversión:" + "\n"
-//////////            + "       java -jar bc3tohtml -f archivo.bc3 -t plantilla.html" + "\n"
-////////////            + "   -v  muestra en pantalla información acerca del proceso de conversión." + "\n"
-//////////            + "   -y  asume una respuesta positiva a cualquier pregunta al usuario que" + "\n"
-//////////            + "       se pueda plantear:" + "\n"
-//////////            + "       java -jar bc3tohtml -f archivo.bc3 -o archivo.html" + "\n"
-//////////            + "           El archivo \"archivo.html\" existe en el sistema." + "\n"
-//////////            + "           ¿Desea sobreescribirlo [S] Sí | [N] No | [R] Renombrar?" + "\n"
-//////////            + "           Con la opción '-y' se asume respuesta positiva a la sobreescritura del archivo." + "\n"
-//////////            + "   -z  muestra una copia de la licencia del software" + "\n"
-//////////            ;
 }

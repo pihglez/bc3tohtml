@@ -20,7 +20,7 @@ import java.io.File;
 
 /**
  *
- * @author pihglez@author Pedro I. Hernández G. <pihglez@gmail.com>
+ * @author Pedro I. Hernández G. <pihglez@gmail.com>
  */
 public class FileManage {
 //    private static File file;

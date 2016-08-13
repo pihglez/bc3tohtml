@@ -30,6 +30,11 @@ public class RandomGenerator {
     private static final String AB1         = A1 + AB;
     private static final SecureRandom rnd   = new SecureRandom();
     
+    /**
+     * Genera una cadena alfanumérica aleatoria de longitud dada (mayúsculas y minúsculas)
+     * @param len <b><int></b> La longitud de la cadena a generar
+     * @return 
+     */
     public static String getRandomAlphaNumericString( int len ){
         StringBuilder sb = new StringBuilder( len );
         for( int i = 0; i < len; i++ ) 
@@ -37,6 +42,11 @@ public class RandomGenerator {
         return sb.toString();
     }
     
+    /**
+     * Genera una cadena alfabética aleatoria de longitud dada (mayúsculas y minúsculas)
+     * @param len <b><int></b> La longitud de la cadena a generar
+     * @return 
+     */
     public static String getRandomUpperLowerString( int len ){
         StringBuilder sb = new StringBuilder( len );
         
@@ -45,6 +55,11 @@ public class RandomGenerator {
         return sb.toString();
     }
     
+    /**
+     * Genera una cadena alfabética aleatoria de longitud dada (mayúsculas)
+     * @param len <b><int></b> La longitud de la cadena a generar
+     * @return 
+     */
     public static String getRandomUpperString( int len ){
         StringBuilder sb = new StringBuilder( len );
         
@@ -53,6 +68,11 @@ public class RandomGenerator {
         return sb.toString();
     }
     
+    /**
+     * Genera una cadena alfabética aleatoria de longitud dada (minúsculas)
+     * @param len <b><int></b> La longitud de la cadena a generar
+     * @return 
+     */
     public static String getRandomLowerString( int len ){
         StringBuilder sb = new StringBuilder( len );
         

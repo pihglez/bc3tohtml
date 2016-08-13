@@ -36,7 +36,7 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v.0.3.7.0";
+    public static final String  BC3TOHTMLVERSION    = "v.0.4.1.0";
     /**
      * En esta constante se almacena el nombre original del software
      */
@@ -217,7 +217,11 @@ public class Bc3tohtml {
             // el archivo de salida NO debe existir
             if ((FileManage.isFileAvailable(LineaComandos.nombreArchivoSalida))) {
                 // no ok
-                throw new ErrorInArgumentsException("El archivo de salida existe. Debe especificar un nombre válido.");
+                if (LineaComandos.asumirRespuestaPositiva) {
+                    System.out.println("Se sobeescribirá el archivo " + LineaComandos.nombreArchivoSalida + ".");
+                } else {
+                    throw new ErrorInArgumentsException("El archivo de salida existe. Debe especificar un nombre válido.");
+                }
             }
             
             // deben establecerse alguno de los argumentos de proceso válidos (-p o -r)

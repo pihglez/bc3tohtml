@@ -26,13 +26,13 @@ import org.ph.stringUtils.StrUtils;
 public class Registro_D_descomposicion {
     // ~D | Código padre | Código hijo 1 \ Factor 1 \ Rendimiento 1 \ Código hijo 2 \ Factor 2 \ Rendimiento 2 \... |
     private final String codigoPadre;
-    private final ArrayList <CodigosHijos> descomp;
+    private final ArrayList <CodigoHijo> descomp;
 
     public String getCodigoPadre() {
         return codigoPadre;
     }
 
-    public ArrayList <CodigosHijos> getCodigosHijos() {
+    public ArrayList <CodigoHijo> getCodigosHijos() {
         return descomp;
     }
     
@@ -43,7 +43,7 @@ public class Registro_D_descomposicion {
         String[] hijosDatos = StrUtils.split(linea[2], '\\');
         
         for (int i = 0; i < hijosDatos.length - 2; i += 3) {
-            descomp.add(new CodigosHijos(hijosDatos[i], 
+            descomp.add(new CodigoHijo(hijosDatos[i], 
                     Double.parseDouble(hijosDatos[i+1]), 
                     Double.parseDouble(hijosDatos[i+2]))
             );

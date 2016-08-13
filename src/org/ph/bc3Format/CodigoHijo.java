@@ -20,7 +20,7 @@ package org.ph.bc3Format;
  *
  * @author Pedro I. Hernández G. <pihglez@gmail.com>
  */
-public class CodigosHijos {
+public class CodigoHijo {
     private final String codigoHijo, codigoPorcentaje;
     private final double factor;
     private final double rendimiento;
@@ -41,17 +41,17 @@ public class CodigosHijos {
         return codigoPorcentaje;
     }
 
-    public CodigosHijos(String codigoHijo, double factor, double rendimiento) {
-        this.codigoHijo     = codigoHijo;
-        this.factor         = factor;
-        this.rendimiento    = rendimiento;
-        this.codigoPorcentaje = "";
+    public CodigoHijo(String codigoHijo, double factor, double rendimiento) {
+        this.codigoHijo         = codigoHijo;
+        this.factor             = factor;
+        this.rendimiento        = rendimiento;
+        this.codigoPorcentaje   = "";
     }
 
-    public CodigosHijos(String codigoHijo, double factor, double rendimiento, String codigoPorcentaje) {
-        this.codigoHijo     = codigoHijo;
-        this.factor         = factor;
-        this.rendimiento    = rendimiento;
-        this.codigoPorcentaje = codigoPorcentaje;
+    public CodigoHijo(String codigoHijo, double factor, double rendimiento, String codigoPorcentaje) {
+        this.codigoHijo         = codigoHijo;
+        this.factor             = factor;
+        this.rendimiento        = rendimiento;
+        this.codigoPorcentaje   = codigoPorcentaje;
     }
 }
