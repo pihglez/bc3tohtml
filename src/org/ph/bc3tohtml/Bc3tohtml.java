@@ -16,8 +16,6 @@
  */
 package org.ph.bc3tohtml;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -292,7 +290,16 @@ public class Bc3tohtml {
         // a estudiar
         LineaComandos.nombreArchivoAProcesar        = (FileManage.isFileAvailable(nombreArchivo)) ? nombreArchivo : null;
         String archivoSalida                        = FileManage.getNameFromBase(LineaComandos.nombreArchivoAProcesar, "html");
-        LineaComandos.nombreArchivoSalida           = (!FileManage.isFileAvailable(archivoSalida)) ? archivoSalida : null;
+        LineaComandos.nombreArchivoSalida           = (!FileManage.isFileAvailable(archivoSalida) || 
+                                                       LineaComandos.asumirRespuestaPositiva) ? 
+                                                       archivoSalida : null;
+        
+        if (LineaComandos.nombreArchivoSalida == null) 
+            try {
+            throw new ErrorInArgumentsException("El nombre del archivo salida no es utilizable.");
+        } catch (ErrorInArgumentsException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
         
         // hay que establecer los valores por defecto de las variables de trabajo
         // que se establecen en gestionaArgumentos según la entrada del usuario

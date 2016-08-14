@@ -640,32 +640,32 @@ public class BC3File {
             nuevaFilaDatos = archivoHtml.getElementById("filadatos").lastElementSibling();
             dato = nuevaFilaDatos.getElementById("codigo_0");
 
-            codHtml = getHtmlBasedOnCode(codNum, concepto.getCodigo());
+            codHtml = getHtmlBasedOnCodigo(codNum, concepto.getCodigo());
             dato.append(codHtml);
 
             dato = nuevaFilaDatos.getElementById("ud_0");
-            codHtml = getHtmlBasedOnCode(codNum, concepto.getUnidad());
+            codHtml = getHtmlBasedOnCodigo(codNum, concepto.getUnidad());
             dato.append(codHtml);
 
             dato = nuevaFilaDatos.getElementById("resumen_0");
             textoLargo = (codNum == 2) ? getTextoDeCodigo(concepto.getCodigo()) : ""; // aquí se puede dar la opción de visualizar el texto de los capítulos en caso de existir
-            codHtml = "<b>" + getHtmlBasedOnCode(codNum, concepto.getResumen()) + "</b>" + 
+            codHtml = "<b>" + getHtmlBasedOnCodigo(codNum, concepto.getResumen()) + "</b>" + 
                     ((textoLargo.length() > 0) ? "<br/>" : "") +
                     textoLargo;
             dato.append(codHtml);
 
 
             dato = nuevaFilaDatos.getElementById("canpres_0");
-            codHtml = (codNum > 1) ? getHtmlBasedOnCode(codNum, String.format("%1$,.2f", concepto.getCanPres())) : "";
+            codHtml = (codNum > 1) ? getHtmlBasedOnCodigo(codNum, String.format("%1$,.2f", concepto.getCanPres())) : "";
             dato.append(codHtml);
 
             dato = nuevaFilaDatos.getElementById("prpres_0");
-            codHtml = (codNum > 1) ? getHtmlBasedOnCode(codNum, String.format("%1$,.2f", concepto.getPrPres())) : "";
+            codHtml = (codNum > 1) ? getHtmlBasedOnCodigo(codNum, String.format("%1$,.2f", concepto.getPrPres())) : "";
             dato.append(codHtml);
 
             dato = nuevaFilaDatos.getElementById("imppres_0");
-            codHtml = (codNum > 1) ? getHtmlBasedOnCode(codNum, String.format("%1$,.2f", concepto.getImpPres())) : 
-                    getHtmlBasedOnCode(codNum, String.format("%1$,.2f", concepto.getPrPres()));
+            codHtml = (codNum > 1) ? getHtmlBasedOnCodigo(codNum, String.format("%1$,.2f", concepto.getImpPres())) : 
+                    getHtmlBasedOnCodigo(codNum, String.format("%1$,.2f", concepto.getPrPres()));
             dato.append(codHtml);
         }
         
@@ -687,7 +687,7 @@ public class BC3File {
      * @param cadena La cadena a formatear en HTML
      * @return 
      */
-    private String getHtmlBasedOnCode(int tipoCodigo, String cadena) {
+    private String getHtmlBasedOnCodigo(int tipoCodigo, String cadena) {
         StringBuilder s = new StringBuilder();
 //        if (!(tipoCodigo > 1)) {
         switch(tipoCodigo) {
