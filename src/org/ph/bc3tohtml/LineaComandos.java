@@ -52,15 +52,15 @@ public class LineaComandos {
     /**
      * Activa la opción de salida únicamente de los elementales del presupuesto/BBDD 
      */
-    public static boolean salidaSoloElementales     = false;    // -e
+    public static boolean salidaSoloEntidades     = false;    // -e
     /**
      * Activa la salida del presupuesto con mediciones
      */
-    public static boolean salidaConMediciones       = false;    // -m
+    public static boolean incluirMediciones       = false;    // -m
     /**
      * Activa la salida del resumen de presupuesto
      */
-    public static boolean incluirResumen            = false;    // -r
+    public static boolean generarResumen            = false;    // -r
     /**
      * Activa la opción de mantener un log que se guarda en un archivo
      */
@@ -72,7 +72,7 @@ public class LineaComandos {
     /**
      * Activa la salida del presupuesto
      */
-    public static boolean incluirPresupuesto        = true;     // -p
+    public static boolean generarPresupuesto        = true;     // -p
     /**
      * Fuerza la lectura del archivo BC3 en codificación Cp1252 (windows)
      */

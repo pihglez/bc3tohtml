@@ -17,6 +17,8 @@
 package org.ph.xmlFormat;
 
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -26,6 +28,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.ph.System.RandomGenerator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -34,17 +37,21 @@ import org.w3c.dom.Element;
  * @author Pedro I. Hernández G. <pihglez@gmail.com>
  */
 public class BcxFormatDefinition {
+    DocumentBuilderFactory docFactory;
+    DocumentBuilder docBuilder;
+    Document doc;
     
     public BcxFormatDefinition () {
         try {
-            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            docFactory = DocumentBuilderFactory.newInstance();
+            docBuilder = docFactory.newDocumentBuilder();
             
-            Document doc = docBuilder.newDocument();
+            doc = docBuilder.newDocument();
             Element grupo = doc.createElement("grupo");
             doc.appendChild(grupo);
             
             Element codigo_grupo = doc.createElement("codigo-grupo");
+            codigo_grupo.setTextContent(RandomGenerator.getRandomAlphaNumericString(13));
             grupo.appendChild(codigo_grupo);
             Element descripcion = doc.createElement("descripcion");
             grupo.appendChild(descripcion);
@@ -366,5 +373,25 @@ public class BcxFormatDefinition {
         } catch (TransformerException ex) {
             System.out.println("Error de transformación de XML: " + ex.getLocalizedMessage());
         }
+    }
+    
+    public boolean writeBcx(String fileName) {
+        boolean writeOk = false;
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        try {
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new File(fileName));
+            
+            transformer.transform(source, result);
+            writeOk = true;
+        } catch (TransformerConfigurationException ex) {
+            System.out.println("Error de configuración en el transformador:  " + ex.getLocalizedMessage());
+        } catch (TransformerException ex) {
+            System.out.println("Error de transformación XML." + ex.getLocalizedMessage());
+        }
+        
+        
+        return writeOk;
     }
 }

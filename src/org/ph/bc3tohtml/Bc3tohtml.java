@@ -80,6 +80,17 @@ public class Bc3tohtml {
                     
                     if (argumentIsFileName(args[0]))                procesarArchivo(args[0]);
                     break;
+                case 2:
+                    if (cmd.hasOption("y")) {
+                        String archivo;
+                        LineaComandos.asumirRespuestaPositiva = true;
+                        if(args[0].toLowerCase().contains("y") && args[0].length() == 1 ) {
+                                archivo = args[1];
+                        } else  archivo = args[0];
+                        if (argumentIsFileName(archivo))            procesarArchivo(archivo);
+                    } else {
+                        throw new ErrorInArgumentsException("Parece que ha introducido un número incorrecto de argumentos. Por favor, verifique la ayuda.");
+                    }
                 default:
                     if (args.length > 2) {
                         // bc3tohtml -f archivo.bc3 -o archivo.html
@@ -144,8 +155,8 @@ public class Bc3tohtml {
         opciones.addOption("l", true,   "Especifica a continuación el archivo de volcado (.log)");                  // archivo (log) de volcado
         opciones.addOption("m", false,  "Incluye las mediciones en el presupuesto");                                // incluir mediciones
         opciones.addOption("o", true,   "Especifica a continuación el archivo de salida (.html)");                  // archivo (output) de salida
-        opciones.addOption("p", false,  "Incluye el presupuesto (opción por defecto con un solo argumento)");       // incluir presupuesto
-        opciones.addOption("r", false,  "Incluye el resumen de presupuesto");                                       // incluir resumen
+        opciones.addOption("p", false,  "Genera el presupuesto (opción por defecto con un solo argumento)");        // incluir presupuesto
+        opciones.addOption("r", false,  "Genera el resumen de presupuesto");                                        // incluir resumen
         opciones.addOption("s", false,  "Muestra estadísticas");                                                    // mostrar estadísticas
         opciones.addOption("t", true,   "Especifica a continuación el archivo de plantilla a utilizar (.html)");    // archivo (template) a utilizar
         opciones.addOption("v", false,  "Muestra la versión del sofware");                                          // muestra la versión del software
@@ -225,10 +236,10 @@ public class Bc3tohtml {
             }
             
             // deben establecerse alguno de los argumentos de proceso válidos (-p o -r)
-            if (!(  LineaComandos.incluirResumen            ||
-                    LineaComandos.incluirPresupuesto        || 
+            if (!(  LineaComandos.generarResumen            ||
+                    LineaComandos.generarPresupuesto        || 
                     LineaComandos.salidaSoloDescompuestos   ||
-                    LineaComandos.salidaSoloElementales)) {
+                    LineaComandos.salidaSoloEntidades)) {
                 
                 throw new ErrorInArgumentsException(""
                         + "Los argumentos de proceso establecidos no son válidos.\n"
@@ -243,7 +254,7 @@ public class Bc3tohtml {
             BC3File bc3f = new BC3File(LineaComandos.nombreArchivoAProcesar);
             if (bc3f.procesaBC3()) {
                 System.out.println("Proceso finalizado correctamente.");
-                System.out.println("Archivo de salida: " + LineaComandos.nombreArchivoSalida);
+                if (LineaComandos.modoVerbose) System.out.println("Archivo de salida: " + LineaComandos.nombreArchivoSalida);
             }
         } catch (ErrorInFormatException|ErrorInArgumentsException ex) {
             System.out.println("Error irrecuperable: " + ex.getMessage());
@@ -256,14 +267,16 @@ public class Bc3tohtml {
      * @param nombreArchivo <strong>String</strong> Nombre del archivo a procesar
      */
     private static void procesarArchivo (String nombreArchivo) {
+        // Error en determinados casos... p.e. cuando se introducen dos argumentos: uno el nombre de archivo y otro "-y"
+        // a estudiar
         LineaComandos.nombreArchivoAProcesar        = (FileManage.isFileAvailable(nombreArchivo)) ? nombreArchivo : null;
         String archivoSalida                        = FileManage.getNameFromBase(LineaComandos.nombreArchivoAProcesar, "html");
         LineaComandos.nombreArchivoSalida           = (!FileManage.isFileAvailable(archivoSalida)) ? archivoSalida : null;
         
         // hay que establecer los valores por defecto de las variables de trabajo
         // que se establecen en gestionaArgumentos según la entrada del usuario
-        LineaComandos.incluirResumen                = true;
-        LineaComandos.incluirPresupuesto            = true;
+        LineaComandos.generarResumen                = false;
+        LineaComandos.generarPresupuesto            = true;
         
         procesarArchivo();
     }
@@ -289,10 +302,10 @@ public class Bc3tohtml {
             
             LineaComandos.salidaApresupuestoCiego   = cmd.hasOption("b");
             LineaComandos.salidaSoloDescompuestos   = cmd.hasOption("d");
-            LineaComandos.salidaSoloElementales     = cmd.hasOption("e");
-            LineaComandos.salidaConMediciones       = cmd.hasOption("m");
-            LineaComandos.incluirResumen            = cmd.hasOption("r");
-            LineaComandos.incluirPresupuesto        = cmd.hasOption("p");
+            LineaComandos.salidaSoloEntidades     = cmd.hasOption("e");
+            LineaComandos.incluirMediciones       = cmd.hasOption("m");
+            LineaComandos.generarResumen            = cmd.hasOption("r");
+            LineaComandos.generarPresupuesto        = cmd.hasOption("p");
             
 //            // implementar mantenimiento de archivo log
 //            LineaComandos.mantenerArchivoLog        = cmd.hasOption("l");

@@ -16,13 +16,8 @@
  */
 package org.ph.bc3tohtml;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -32,14 +27,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.ph.System.FileManage;
+import org.ph.bc3Format.Bc3ConceptoPres;
 import org.ph.bc3Format.CodigoHijo;
 import org.ph.bc3Format.ConstantesTexto;
 import org.ph.bc3Format.LineaMedicion;
@@ -54,6 +46,7 @@ import org.ph.bc3Format.Registro_T_texto;
 import org.ph.bc3Format.Registro_V_prpdad;
 import org.ph.errors.ErrorInFormatException;
 import org.ph.loggerToFile.Bc3ParserLogger;
+import org.ph.xmlFormat.BcxFormatDefinition;
 
 /**
  *
@@ -61,6 +54,8 @@ import org.ph.loggerToFile.Bc3ParserLogger;
  */
 public class BC3File {
     private final String                                bc3FileToProcess;
+    
+    private int                                         numBucles;
     
     private Registro_V_prpdad                           rPropiedad;
     private Registro_K_coeficientes                     rCoeficientes;
@@ -74,15 +69,20 @@ public class BC3File {
     
     private Bc3ParserLogger                             log;
     
+    private Document                                    archivoHtml;
+    
     /**
      * Archivo a leer
      * @param fileName <code>String</code> ruta del archivo a leer
      */
     public BC3File (String fileName) {
+        numBucles = 0;
         this.bc3FileToProcess = fileName;
     }
     
     public boolean procesaBC3() throws ErrorInFormatException {
+        double tt;
+        long t0, t1;
         if (LineaComandos.mantenerArchivoLog) log = new Bc3ParserLogger();
         boolean conversion = false, procesar = false;
         if (FileManage.isFileAvailable(bc3FileToProcess)) {
@@ -90,7 +90,6 @@ public class BC3File {
                 if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Procesando " + bc3FileToProcess);
                 String lineaLeida;      // almacenamiento de la línea leída
                 int numLineaLeida = 0;  // Número de línea leída
-//                boolean mostrarLineas = false; int mLdesde = 1090, mLhasta = 1100; // para bucle de control
                 
                 // primero averiguamos la codificación del archivo a no ser que se fuerce codificación Cp1252
                 String codificacion;
@@ -122,16 +121,13 @@ public class BC3File {
                 
                 if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Variables de almacenamiento establecidas.");
                 
-                double tt;                          // variables para medir la duración del proceso
-                long t0 = System.nanoTime(), t1;
+                t0 = System.nanoTime();
                 
                 if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Iniciando la lectura...");
                 
                 // <editor-fold defaultstate="expanded" desc=" Lectura línea a línea del archivo BC3 "> // http://wiki.netbeans.org/SurroundWithCodeFolding
                 while ((lineaLeida = br.readLine()) != null) {
                     // realmente el separador de conceptos en el formato BC3 es el carácter '~' (ASCII 126)
-                    // se deben ir añadiendo líneas al registro hasta que se encuentre el carácter '~' de nuevo
-                    
                     numLineaLeida++;
                     if (lineaLeida.length() > 1) {
                         if(String.valueOf(lineaLeida.charAt(0)).equals(ConstantesTexto.inicioConcepto)) {
@@ -146,7 +142,7 @@ public class BC3File {
                     // comprobación inicial de que el archivo tiene el formato
                     // BC3 (los dos primeros bytes deben ser "~V")
                     if (numLineaLeida == 1 && !(lineaLeida.substring(0, 2).equals("~V"))) throw new ErrorInFormatException(""
-                                + "El archivo de origen no parece que tenga el formato BC3 adecuado.");
+                                + "El archivo de origen no parece que sea un archivo BC3.");
                     
                     if (procesar) {
                         String[] datosLinea;
@@ -225,20 +221,7 @@ public class BC3File {
                 
                 br.close();
                 if (LineaComandos.mostrarEstadisticas) {
-                    StringBuilder statistics = new StringBuilder();
-                    
-                    statistics.append("ESTADÍSTICAS:\n");
-                    statistics.append("El proceso de lectura ha durado ").append(String.format("%2.3f", tt)).append(" ms.\n");
-                    statistics.append("  Líneas leídas: ").append(numLineaLeida).append(".\n");
-                    statistics.append("    ").append(rCodigos.size()).append(" conceptos.\n");
-                    statistics.append("    ").append(rDescompuestos.size()).append(" registros de descomposición.\n");
-                    statistics.append("    ").append(rMediciones.size()).append(" partidas con mediciones.\n");
-                    statistics.append("    ").append(rTextos.size()).append(" campos de texto.\n");
-                    statistics.append("    ").append(rPliegos.size()).append(" pliegos.\n");
-                    statistics.append("    ").append(rInformaGrafica.size()).append(" registros gráficos.\n");
-                    statistics.append("    ").append(rEntidades.size()).append(" entidades.");
-                    
-                    System.out.println(statistics);
+                    System.out.println(getEstadisticasProcesoArchivoBc3(t0, t1, tt, numLineaLeida));
                 }
                 
             } catch (FileNotFoundException ex) {
@@ -260,8 +243,13 @@ public class BC3File {
             }
 
             InputStream is = this.getClass().getResourceAsStream(plantillaHTML);
-
+            
+            t0 = System.nanoTime();
             conversion = generaHTML(is);
+            t1 = System.nanoTime();
+            tt = (t1 - t0) / 1000000l;  // duración en milisegundos
+            System.out.println("Se han realizado " + numBucles + " bucles.");
+            System.out.println("El proceso de formato ha durado ".concat(String.format("%2.3f", tt)).concat(" ms.\n"));
         
         // </editor-fold>
         }
@@ -376,42 +364,32 @@ public class BC3File {
         boolean trabajoRealizadoOK = false;
         try {
             // Implementación del uso de jsoup
-            Document archivoHtml = Jsoup.parse(plantilla, "UTF-8", "http://www.google.com");
+            archivoHtml = Jsoup.parse(plantilla, "UTF-8", "http://www.google.com");
             if(LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Documento de plantilla analizado correctamente.");
             
             // elementos comunes
-            Element tituloDocumento = archivoHtml.getElementById("titulo-documento");
-            String tituloBBDD = getTituloBBDD();
-            tituloDocumento.text("bc3tohtml :: " + tituloBBDD);
-            Element propiedadDocumento = archivoHtml.getElementById("propiedad-archivo");
-            propiedadDocumento.appendText(rPropiedad.getPROPIEDAD_ARCHIVO());
-            
-            Element encabezado = archivoHtml.getElementById("encabezado-principal");
+            setElementosComunes();
+            setEncabezadosTabla();
             
             Element cuerpoTabla = archivoHtml.getElementById("cuerpotabla");
             Element filaDatos   = archivoHtml.getElementById("filadatos");
             Element nuevaFilaDatos, dato;
             
-            if (LineaComandos.incluirResumen || LineaComandos.incluirPresupuesto || LineaComandos.salidaSoloDescompuestos) {
-                if (!LineaComandos.salidaConMediciones) {
-                    dato = archivoHtml.getElementById("n");         dato.text("");
-                    dato = archivoHtml.getElementById("longitud");  dato.text("");
-                    dato = archivoHtml.getElementById("anchura");   dato.text("");
-                    dato = archivoHtml.getElementById("altura");    dato.text("");
-                    dato = archivoHtml.getElementById("parcial");   dato.text("");
-                    dato = archivoHtml.getElementById("resumen");   dato.attr("width", "70%");
-                }
+            trabajoRealizadoOK = conceptoAHTML(cuerpoTabla, filaDatos, getConceptoRaiz());
+            
+            /*
+            // <editor-fold defaultstate="collapsed" desc=" CARGA DE DATOS EN LA TABLA HTML DE VISUALIZACIÓN ">
+
+            if ((LineaComandos.generarResumen || LineaComandos.generarPresupuesto || LineaComandos.salidaSoloDescompuestos)) {
                 
-/*//////////////ordenar el presupuesto a partir de su codigo raiz (y su descomposición) anidada///////////////////////////////////////////////////////////*/
-                /*  IMPLEMENTAR LECTURA SEGÚN DESCOMPOSICIÓN PARA RESPETAR EL ORDEN CORRECTO dado que en ocasiones, el software de exportación
-                    de los archivos BC3 no los estructura ordenadamente */
-                for(Registro_C_concepto registro : rCodigos) {                      // hay que ordenar el presupuesto en función de su código raíz
+                
+                for(Registro_C_concepto registro : rCodigos) {                      // hay que ordenar el presupuesto en función de su código raíz y su descomposición de manera iterativa
                     if(registro.getCodigo().endsWith("##")){                        // código raíz
-                        EstructuraConceptos estructuraPres = new EstructuraConceptos(registro.getCodigo());
-                        System.out.println("Tratando de guardar XML(JAXB)");
-                        estructuraPres.saveJAXBXML(estructuraPres, LineaComandos.nombreArchivoSalida + ".xml");
-                        System.out.println("Tratando de guardar XML(bean)");
-                        estructuraPres.writeBeanXML(estructuraPres, LineaComandos.nombreArchivoSalida + ".bean.xml");
+                        System.out.print("Tratando de escribir archivo de estructura: " + "./" + LineaComandos.nombreArchivoSalida + ".bcx");
+                        BcxFormatDefinition bcx = new BcxFormatDefinition();
+                        if (bcx.writeBcx("./" + LineaComandos.nombreArchivoSalida + ".bcx")) {
+                                System.out.println("  ->  archivo bcx escrito correctamente.");} else {
+                                System.out.println("archivo no escrito"); }
                         
                         cuerpoTabla.prependChild(filaDatos.clone());
                         
@@ -439,7 +417,7 @@ public class BC3File {
                             dato.append("<h4>" + String.format("%1$,.2f", registro.getPrecio()) + "</h4>");
                         }
                         
-                        if(LineaComandos.incluirPresupuesto) {
+                        if(LineaComandos.generarPresupuesto) {
                             double rendimiento = 0d, precio = 0d, importe = 0d;
                             StringBuilder sb = new StringBuilder();
                             for (Registro_D_descomposicion desc : rDescompuestos) {
@@ -484,38 +462,12 @@ public class BC3File {
                     }
                 }
             }
+            // </editor-fold>
+            */
             
-            if(LineaComandos.salidaSoloElementales && (rEntidades.size() > 0)) {
-                // TODO: habría que quitar u ocultar los encabezados
-                
-                encabezado.text("Entidades");
-                for(Registro_E_entidad registro : rEntidades) {
-                    cuerpoTabla.prependChild(filaDatos.clone());
-                        
-                    nuevaFilaDatos = archivoHtml.getElementById("filadatos").firstElementSibling();
-                    dato = nuevaFilaDatos.getElementById("codigo_0");
-                    dato.appendText(registro.getCodigo_entidad());
-                    dato = nuevaFilaDatos.getElementById("resumen_0");
-                    String entidad  = registro.getNombre()
-                                    + ((registro.getCif()   != null) ? "<br/>" + registro.getCif()    : "")
-                                    + ((registro.getNombre()!= null) ? "<br/>" + registro.getResumen(): "")
-                                    + ((registro.getWeb()   != null) ? "<br/>" + registro.getWeb()    : "")
-                                    + ((registro.getWeb()   != null) ? "<br/>" + registro.getEmail()  : "");
-                    dato.append(entidad);
-                    
-                    Element elemento;
-                    elemento = archivoHtml.getElementById("ud");        elemento.text("");
-                    elemento = archivoHtml.getElementById("n");         elemento.text("");
-                    elemento = archivoHtml.getElementById("longitud");  elemento.text("");
-                    elemento = archivoHtml.getElementById("anchura");   elemento.text("");
-                    elemento = archivoHtml.getElementById("altura");    elemento.text("");
-                    elemento = archivoHtml.getElementById("parcial");   elemento.text("");
-                    elemento = archivoHtml.getElementById("canpres");   elemento.text("");
-                    elemento = archivoHtml.getElementById("prpres");    elemento.text("");
-                    elemento = archivoHtml.getElementById("imppres");   elemento.text("");
-                    elemento = archivoHtml.getElementById("resumen");   elemento.attr("width", "80%");
-                }
-            }
+            
+            if(LineaComandos.salidaSoloEntidades && (rEntidades.size() > 0)) setFilasEntidades(cuerpoTabla, filaDatos);
+            
             
             filaDatos.remove();
             
@@ -537,8 +489,6 @@ public class BC3File {
     
     private String getHtmlFileName(String fileName) {
         int punto = fileName.lastIndexOf(".");
-//        String fn = fileName.substring(0, punto);
-        
         return fileName.substring(0, punto);
     }
     
@@ -549,7 +499,7 @@ public class BC3File {
     private String getTextoDeCodigo(String codigo) {
         StringBuilder s = new StringBuilder();
         for (Registro_T_texto rtt : rTextos) {
-            if (rtt.getCodigoConcepto().equals(codigo)) {
+            if (rtt.getCodigoConcepto().trim().equals(codigo)) {
                 s.append(rtt.getTextoDescriptivo());
                 break;
             }
@@ -560,7 +510,7 @@ public class BC3File {
     private String getResumenDeCodigo(String codigo) {
         String s = "";
         for (Registro_C_concepto rcc : rCodigos){
-            if (codigo.equals(rcc.getCodigo())) {
+            if (codigo.trim().equals(rcc.getCodigo())) {
                 s = rcc.getResumen();
                 break;
             }
@@ -568,21 +518,29 @@ public class BC3File {
         return s;
     }
     
-    private double getMedicionTotalDeCodigo(String codigo) {
+    /**
+     * Método que, a partir del código del concepto, devuelve la medición total
+     * del mismo
+     * @param codigoConcepto <code>String</code> El código del concepto cuya medición se busca
+     * @return <code>double</code> El valor de la medición cuyo código es <code>codigoConcepto</code>
+     */
+    private double getMedicionTotalDeCodigo(String codigoConcepto) {
         double d = 0d;
-        for (Registro_M_mediciones med : rMediciones) {
-            if (codigo.equals(med.getCodigoPadre())) {
-                d = med.getMedicionTotal();
-                break;
+        for(Registro_D_descomposicion desc : rDescompuestos) {
+            for (int i = 0; i < desc.getCodigosHijos().size();i++) {
+                if(desc.getCodigosHijos().get(i).getCodigoHijo().equals(codigoConcepto)) {
+                    d = desc.getCodigosHijos().get(i).getRendimiento();
+                }
             }
         }
+        
         return d;
     }
     
     private double getPrecioDeCodigo(String codigo) {
         double d = 0d;
         for (Registro_C_concepto concepto : rCodigos) {
-            if(codigo.equals(concepto.getCodigo())) {
+            if(codigo.trim().equals(concepto.getCodigo())) {
                 d = concepto.getPrecio();
                 break;
             }
@@ -593,7 +551,7 @@ public class BC3File {
     private String getUnidadDeCodigo (String codigo) {
         String s = "";
         for (Registro_C_concepto rcc : rCodigos){
-            if (codigo.equals(rcc.getCodigo())) {
+            if (codigo.trim().equals(rcc.getCodigo())) {
                 s = rcc.getUnidad();
                 break;
             }
@@ -604,15 +562,15 @@ public class BC3File {
     private String getConceptoRaiz() {
         String s = "";
         for (Registro_C_concepto rcc : rCodigos){
-            if (rcc.getCodigo().endsWith("##")) {
-                s = rcc.getUnidad();
+            if (rcc.getCodigo().trim().endsWith("##")) {
+                s = rcc.getCodigo().trim();
                 break;
             }
         }
         return s;
     }
     
-    private ArrayList getMediciones(String concepto) {
+    private ArrayList getLineasMedicion(String concepto) {
         ArrayList<LineaMedicion> mediciones;
         mediciones = new ArrayList<>();
         // implementar
@@ -622,125 +580,245 @@ public class BC3File {
     
     private ArrayList getCodigosHijos(String codigo) {
         for (Registro_D_descomposicion desc : rDescompuestos) {
-            if (desc.getCodigoPadre().equals(codigo)) {
+            if (desc.getCodigoPadre().trim().equals(codigo)) {
                 return desc.getCodigosHijos();
             }
         }
         return null;
     }
     
-    private class EstructuraConceptos {
-        String codigo;
-        String unidad;
-        String resumen;
-        String texto;
-        double canPres, prPres, impPres;
-        ArrayList<LineaMedicion>        medicionesArrayList;
-        ArrayList<CodigoHijo>           codigosHijos;
-        ArrayList<EstructuraConceptos>  conceptosHijos;
-        
-        public EstructuraConceptos(String codigo) {
-            this.codigo = codigo;
-            
-            unidad              = getUnidadDeCodigo(codigo);
-            resumen             = getResumenDeCodigo(codigo);
-            texto               = getTextoDeCodigo(codigo);
-            
-            canPres             = getMedicionTotalDeCodigo(codigo);
-            prPres              = getPrecioDeCodigo(codigo);
-            impPres             = canPres * prPres;
-            
-            // implementar las mediciones
-            medicionesArrayList = getMediciones(codigo);            // apuntamos al arrayList creado
-//            medicionesArrayList.addAll(getMediciones(codigo));    // ¿dará error en tiempo de ejecución?
-            codigosHijos        = getCodigosHijos(codigo);
-            conceptosHijos      = (codigosHijos != null) ? getConceptosHijos(codigosHijos): null;
+    private String getTextoEncabezado() {
+        StringBuilder s = new StringBuilder();
+        if (LineaComandos.generarPresupuesto) s.append("Presupuesto");
+        if (LineaComandos.generarResumen) {
+            s.append(
+                    ((s.length() > 0) ? " y " : "").concat("Resumen")
+            );
+        }
+        if (LineaComandos.salidaSoloEntidades) {
+            s.append(
+                    ((s.length() > 0) ? " y " : "").concat("Entidades")
+            );
         }
         
-        private ArrayList<EstructuraConceptos> getConceptosHijos(ArrayList<CodigoHijo> codigos) {
-            ArrayList<EstructuraConceptos> listaConceptos = new ArrayList<EstructuraConceptos>();
-            for (CodigoHijo codigo : codigos) {
-                listaConceptos.add(new EstructuraConceptos(codigo.getCodigoHijo()));
+        return s.toString();
+    }
+    
+    /**
+     * Establece los contenidos de elementos comunes del archivo HTML generado,
+     * como son el título, la propiedad del archivo y su encabezado principal
+     */
+    private void setElementosComunes() {
+        Element tituloDocumento = archivoHtml.getElementById("titulo-documento");
+        String raiz = getConceptoRaiz();
+        String tituloBBDD = getResumenDeCodigo(raiz);
+        tituloDocumento.text("bc3tohtml :: " + tituloBBDD);
+
+        Element propiedadDocumento = archivoHtml.getElementById("propiedad-archivo");
+        propiedadDocumento.appendText(rPropiedad.getPROPIEDAD_ARCHIVO());
+
+        Element encabezado = archivoHtml.getElementById("encabezado-principal");
+        encabezado.text(getTextoEncabezado());
+    }
+    
+    /**
+     * Establece los encabezados de la tabla que contiene todos los datos en
+     * función de las opciones seleccionadas por el usuario: con mediciones o no,
+     * con resumen o no, sólo entidades, etc.
+     */
+    private void setEncabezadosTabla() {
+        Element elemento;
+        if (!LineaComandos.incluirMediciones) {
+            elemento = archivoHtml.getElementById("n");         elemento.text("");
+            elemento = archivoHtml.getElementById("longitud");  elemento.text("");
+            elemento = archivoHtml.getElementById("anchura");   elemento.text("");
+            elemento = archivoHtml.getElementById("altura");    elemento.text("");
+            elemento = archivoHtml.getElementById("parcial");   elemento.text("");
+            elemento = archivoHtml.getElementById("resumen");   elemento.attr("width", "70%");
+        }
+        
+        if (LineaComandos.generarResumen & !LineaComandos.generarPresupuesto) {
+            elemento = archivoHtml.getElementById("canpres");   elemento.text("");
+            elemento = archivoHtml.getElementById("prpres");    elemento.text("");
+        }
+        
+        if (LineaComandos.salidaSoloEntidades) {
+            elemento = archivoHtml.getElementById("ud");        elemento.text("");
+            elemento = archivoHtml.getElementById("n");         elemento.text("");
+            elemento = archivoHtml.getElementById("longitud");  elemento.text("");
+            elemento = archivoHtml.getElementById("anchura");   elemento.text("");
+            elemento = archivoHtml.getElementById("altura");    elemento.text("");
+            elemento = archivoHtml.getElementById("parcial");   elemento.text("");
+            elemento = archivoHtml.getElementById("canpres");   elemento.text("");
+            elemento = archivoHtml.getElementById("prpres");    elemento.text("");
+            elemento = archivoHtml.getElementById("imppres");   elemento.text("");
+            elemento = archivoHtml.getElementById("resumen");   elemento.attr("width", "80%");
+        }
+    }
+    
+    /**
+     * Genera el código HTML de las entidades incluidas en el archivo BC3
+     * @param cuerpoTabla <code>Element</code> la ubicación en la que se localizará la fila insertada
+     * @param filaDatos <code>Element</code> la fila de datos insertada
+     */
+    private void setFilasEntidades(Element cuerpoTabla, Element filaDatos) {
+        Element dato, nuevaFilaDatos;
+        for(Registro_E_entidad registro : rEntidades) {
+            cuerpoTabla.prependChild(filaDatos.clone());
+
+            nuevaFilaDatos = archivoHtml.getElementById("filadatos").firstElementSibling();
+            dato = nuevaFilaDatos.getElementById("codigo_0");
+            dato.appendText(registro.getCodigo_entidad());
+            dato = nuevaFilaDatos.getElementById("resumen_0");
+            String entidad  = registro.getNombre()
+                            + ((registro.getCif()   != null) ? "<br/>" + registro.getCif()    : "")
+                            + ((registro.getNombre()!= null) ? "<br/>" + registro.getResumen(): "")
+                            + ((registro.getWeb()   != null) ? "<br/>" + registro.getWeb()    : "")
+                            + ((registro.getWeb()   != null) ? "<br/>" + registro.getEmail()  : "");
+            dato.append(entidad);
+        }
+    }
+    
+    private StringBuilder getEstadisticasProcesoArchivoBc3(long t0, long t1, double tt, int numLineaLeida) {
+        StringBuilder statistics = new StringBuilder();
+                    
+        statistics.append("ESTADÍSTICAS:\n");
+        statistics.append("El proceso de lectura ha durado ").append(String.format("%2.3f", tt)).append(" ms.\n");
+        statistics.append("  Líneas leídas: ").append(numLineaLeida).append(".\n");
+        statistics.append("    ").append(rCodigos.size()).append(" conceptos.\n");
+        statistics.append("    ").append(rDescompuestos.size()).append(" registros de descomposición.\n");
+        statistics.append("    ").append(rMediciones.size()).append(" partidas con mediciones.\n");
+        statistics.append("    ").append(rTextos.size()).append(" campos de texto.\n");
+        statistics.append("    ").append(rPliegos.size()).append(" pliegos.\n");
+        statistics.append("    ").append(rInformaGrafica.size()).append(" registros gráficos.\n");
+        statistics.append("    ").append(rEntidades.size()).append(" entidades.");
+        
+        return statistics;
+    }
+    
+    private boolean conceptoAHTML(Element cuerpoTabla, Element filaDatos, String codigoConcepto) {
+        numBucles++;
+        
+        boolean allOk = false;
+        int codNum; // 0: raíz; 1: capítulo; 2: partida/auxiliar/elemental
+        double medicion, precio, importe;
+        Element nuevaFilaDatos, dato;
+        
+        medicion    = getMedicionTotalDeCodigo(codigoConcepto);
+        precio      = getPrecioDeCodigo(codigoConcepto);
+        importe     = medicion * precio;
+        
+        String codHtml, textoLargo;
+        
+        Bc3ConceptoPres concepto = new Bc3ConceptoPres(
+                codigoConcepto,
+                getUnidadDeCodigo(codigoConcepto),
+                getResumenDeCodigo(codigoConcepto),
+                getTextoDeCodigo(codigoConcepto),
+                medicion,
+                precio,
+                importe);
+        codNum = (concepto.getCodigo().endsWith("##")) ? 0 :    // raíz
+                 (concepto.getCodigo().endsWith("#"))  ? 1 : 2; // 1: capítulo; 2: partida/auxiliar/elemental
+        
+        if ((LineaComandos.generarResumen && codNum < 2) || LineaComandos.generarPresupuesto) {
+            cuerpoTabla.appendChild(filaDatos.clone());
+
+            nuevaFilaDatos = archivoHtml.getElementById("filadatos").lastElementSibling();
+            dato = nuevaFilaDatos.getElementById("codigo_0");
+
+            codHtml = getHtmlBasedOnCode(codNum, concepto.getCodigo());
+            dato.append(codHtml);
+
+            dato = nuevaFilaDatos.getElementById("ud_0");
+            codHtml = getHtmlBasedOnCode(codNum, concepto.getUnidad());
+            dato.append(codHtml);
+
+            dato = nuevaFilaDatos.getElementById("resumen_0");
+            textoLargo = (codNum == 2) ? getTextoDeCodigo(concepto.getCodigo()) : ""; // aquí se puede dar la opción de visualizar el texto de los capítulos en caso de existir
+            codHtml = "<b>" + getHtmlBasedOnCode(codNum, concepto.getResumen()) + "</b>" + 
+                    ((textoLargo.length() > 0) ? "<br/>" : "") +
+                    textoLargo;
+            dato.append(codHtml);
+
+
+            dato = nuevaFilaDatos.getElementById("canpres_0");
+            codHtml = (codNum > 1) ? getHtmlBasedOnCode(codNum, String.format("%1$,.2f", concepto.getCanPres())) : "";
+            dato.append(codHtml);
+
+            dato = nuevaFilaDatos.getElementById("prpres_0");
+            codHtml = (codNum > 1) ? getHtmlBasedOnCode(codNum, String.format("%1$,.2f", concepto.getPrPres())) : "";
+            dato.append(codHtml);
+
+            dato = nuevaFilaDatos.getElementById("imppres_0");
+            codHtml = (codNum > 1) ? getHtmlBasedOnCode(codNum, String.format("%1$,.2f", concepto.getImpPres())) : 
+                    getHtmlBasedOnCode(codNum, String.format("%1$,.2f", concepto.getPrPres()));
+            dato.append(codHtml);
+        }
+        
+        ArrayList<CodigoHijo> al = new ArrayList();
+        al = getCodigosHijos(codigoConcepto);
+        if (al != null && (!(LineaComandos.salidaSoloDescompuestos)) && !(codNum > 1)) {
+            for (CodigoHijo desc : al) {
+                conceptoAHTML(cuerpoTabla, filaDatos, getCodigoDescomposicionOk(desc.getCodigoHijo()));
             }
-            
-            return listaConceptos;
-        }
-
-        public String getCodigo() {
-            return codigo;
-        }
-
-        public String getUnidad() {
-            return unidad;
-        }
-
-        public String getResumen() {
-            return resumen;
-        }
-
-        public String getTexto() {
-            return texto;
-        }
-
-        public double getCanPres() {
-            return canPres;
-        }
-
-        public double getPrPres() {
-            return prPres;
-        }
-
-        public double getImpPres() {
-            return impPres;
-        }
-
-        public ArrayList<LineaMedicion> getMedicionesArrayList() {
-            return medicionesArrayList;
-        }
-
-        public ArrayList<CodigoHijo> getHijos() {
-            return codigosHijos;
         }
         
-        public void saveJAXBXML(EstructuraConceptos estructura, String nombreArchivo) {
-            try {
-                JAXBContext contexto = JAXBContext.newInstance(EstructuraConceptos.class);
-                Marshaller m = contexto.createMarshaller();
-                m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                
-                System.out.println("guardando xml en " + nombreArchivo);
-                m.marshal(estructura, new File(nombreArchivo));
-                
-                
-            } catch (Exception e) {
-                System.out.println("--ERROR: " + e.getLocalizedMessage());
+        return allOk;
+    }
+    
+    /**
+     * Devuelve el código HTML empleado para enfatizar el código raíz, los
+     * capítulos y otros aspectos del archivo html exportado
+     * @param tipoCodigo 0: raíz; 1: capítulo; 2: partida/auxiliar/elemental
+     * @param cadena La cadena a formatear en HTML
+     * @return 
+     */
+    private String getHtmlBasedOnCode(int tipoCodigo, String cadena) {
+        StringBuilder s = new StringBuilder();
+//        if (!(tipoCodigo > 1)) {
+        switch(tipoCodigo) {
+            case 0: // raíz
+                s.append("<h3>" + cadena.replace("##", "") + "</h3>");
+                break;
+            case 1: // capítulo
+                s.append("<h4>" + cadena.replace("#", "") + "</h4>");
+                break;
+            case 2: // normal
+                s.append(cadena);
+                break;
+        }
+//        } else {
+//            return cadena;
+//        }
+        return s.toString();
+    }
+    
+    /**
+     * Dado que el formato BC3 permite que los códigos de descomposición, en el
+     * caso de los capítulos se guarden sin el marcador de capítulo ('#'), se
+     * hace necesario re-codificar los códigos de descomposición para asegurar
+     * que las búsquedas ordenadas se realizan adecuadamente.
+     * Este método añade la codificación de capítulo en el caso de que se haya
+     * perdido en la descomposición
+     * 
+     * @param codigoDescomposicion
+     * @return 
+     */
+    private String getCodigoDescomposicionOk(String codigoDescomposicion) {
+        String s = "";
+        if (!codigoDescomposicion.endsWith("##")) {
+            for (Registro_C_concepto rCodigo : rCodigos) {
+                if (
+                    (rCodigo.getCodigo().startsWith(codigoDescomposicion)) &&
+                    (rCodigo.getCodigo().length() == codigoDescomposicion.length() +1)) {
+                    
+                    s = codigoDescomposicion.concat("#");
+                    break;
+                }
             }
         }
         
-        public void writeBeanXML(EstructuraConceptos ec, String filename) {
-            try {
-                XMLEncoder encoder;
-                encoder = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(filename)));
-                encoder.writeObject(ec);
-                encoder.close();
-            } catch (FileNotFoundException ex) {
-                System.out.println("--ERROR: " + ex.getLocalizedMessage());
-            }
-            
-        }
-        
-        public EstructuraConceptos readBeanXML(String filename) {
-            XMLDecoder decoder;
-            EstructuraConceptos o = null;
-            try {
-                decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(filename)));
-                o = (EstructuraConceptos) decoder.readObject();
-                decoder.close();
-            } catch (FileNotFoundException ex) {
-                System.out.println("--ERROR: " + ex.getLocalizedMessage());
-            }
-            
-            return o;
-        }
+        return ((s.length() == 0) ? codigoDescomposicion : s);
     }
 }
