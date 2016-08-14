@@ -373,100 +373,13 @@ public class BC3File {
             
             Element cuerpoTabla = archivoHtml.getElementById("cuerpotabla");
             Element filaDatos   = archivoHtml.getElementById("filadatos");
-            Element nuevaFilaDatos, dato;
+//            Element nuevaFilaDatos, dato;
             
-            trabajoRealizadoOK = conceptoAHTML(cuerpoTabla, filaDatos, getConceptoRaiz());
-            
-            /*
-            // <editor-fold defaultstate="collapsed" desc=" CARGA DE DATOS EN LA TABLA HTML DE VISUALIZACIÓN ">
-
-            if ((LineaComandos.generarResumen || LineaComandos.generarPresupuesto || LineaComandos.salidaSoloDescompuestos)) {
-                
-                
-                for(Registro_C_concepto registro : rCodigos) {                      // hay que ordenar el presupuesto en función de su código raíz y su descomposición de manera iterativa
-                    if(registro.getCodigo().endsWith("##")){                        // código raíz
-                        System.out.print("Tratando de escribir archivo de estructura: " + "./" + LineaComandos.nombreArchivoSalida + ".bcx");
-                        BcxFormatDefinition bcx = new BcxFormatDefinition();
-                        if (bcx.writeBcx("./" + LineaComandos.nombreArchivoSalida + ".bcx")) {
-                                System.out.println("  ->  archivo bcx escrito correctamente.");} else {
-                                System.out.println("archivo no escrito"); }
-                        
-                        cuerpoTabla.prependChild(filaDatos.clone());
-                        
-                        nuevaFilaDatos = archivoHtml.getElementById("filadatos").firstElementSibling();
-                        dato = nuevaFilaDatos.getElementById("codigo_0");
-                        dato.append("<h3>" + registro.getCodigo().replace("##", "") + "</h3>");
-                        dato = nuevaFilaDatos.getElementById("resumen_0");
-                        dato.append("<h3>" + registro.getResumen() + "</h3>");
-                        if (!LineaComandos.salidaSoloDescompuestos) {
-                            dato = nuevaFilaDatos.getElementById("imppres_0");
-                            dato.append("<h3>" + String.format("%1$,.2f", registro.getPrecio()) + "</h3>");                // formato del número
-                        }
-                    }
-
-                    if(!(registro.getCodigo().endsWith("##")) && registro.getCodigo().endsWith("#")){   // capítulo normal
-                        cuerpoTabla.appendChild(filaDatos.clone());
-
-                        nuevaFilaDatos = archivoHtml.getElementById("filadatos").lastElementSibling();
-                        dato = nuevaFilaDatos.getElementById("codigo_0");
-                        dato.append("<h4>" + registro.getCodigo().replace("#", "") + "</h4>");
-                        dato = nuevaFilaDatos.getElementById("resumen_0");
-                        dato.append("<h4>" + registro.getResumen() + "</h4>");
-                        if (!LineaComandos.salidaSoloDescompuestos) {
-                            dato = nuevaFilaDatos.getElementById("imppres_0");
-                            dato.append("<h4>" + String.format("%1$,.2f", registro.getPrecio()) + "</h4>");
-                        }
-                        
-                        if(LineaComandos.generarPresupuesto) {
-                            double rendimiento = 0d, precio = 0d, importe = 0d;
-                            StringBuilder sb = new StringBuilder();
-                            for (Registro_D_descomposicion desc : rDescompuestos) {
-                                if (desc.getCodigoPadre().equals(registro.getCodigo())) {   // coincide con el código padre
-                                    
-                                    for(CodigoHijo codigosHijo : desc.getCodigosHijos()) {
-                                        // se añaden los descompuestos
-                                        cuerpoTabla.appendChild(filaDatos.clone());
-                                        rendimiento = codigosHijo.getRendimiento();
-                                        precio      = getPrecioDeCodigo(codigosHijo.getCodigoHijo());
-                                        importe     = rendimiento * precio;
-
-                                        nuevaFilaDatos = archivoHtml.getElementById("filadatos").lastElementSibling();
-
-                                        dato = nuevaFilaDatos.getElementById("codigo_0");
-                                        dato.text(codigosHijo.getCodigoHijo());
-                                        
-                                        dato = nuevaFilaDatos.getElementById("ud_0");
-                                        dato.text(getUnidadDeCodigo(codigosHijo.getCodigoHijo()));
-                                        
-                                        dato = nuevaFilaDatos.getElementById("resumen_0");
-                                        dato.append("<strong>" + getResumenDeCodigo(codigosHijo.getCodigoHijo()) + "</strong>" + "".concat(
-                                                (sb.append(getTextoDeCodigo(codigosHijo.getCodigoHijo())).length() > 0) ?
-                                                        "<br/>" + sb.toString() :
-                                                        ""
-                                        ));
-                                        
-                                        dato = nuevaFilaDatos.getElementById("canpres_0");
-                                        dato.text(String.format("%1$,.2f", rendimiento));
-                                        
-                                        dato = nuevaFilaDatos.getElementById("prpres_0");
-                                        dato.text(String.format("%1$,.2f", precio));
-                                        
-                                        dato = nuevaFilaDatos.getElementById("imppres_0");
-                                        dato.text(String.format("%1$,.2f", importe));
-                                        sb.setLength(0);
-                                    }                                    
-
-                                }
-                            }
-                        }
-                    }
-                }
+            if(LineaComandos.salidaSoloEntidades && (rEntidades.size() > 0)) {
+                setFilasEntidades(cuerpoTabla, filaDatos);
+            } else {
+                trabajoRealizadoOK = conceptoAHTML(cuerpoTabla, filaDatos, getConceptoRaiz());
             }
-            // </editor-fold>
-            */
-            
-            
-            if(LineaComandos.salidaSoloEntidades && (rEntidades.size() > 0)) setFilasEntidades(cuerpoTabla, filaDatos);
             
             
             filaDatos.remove();
