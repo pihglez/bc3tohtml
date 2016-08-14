@@ -72,7 +72,7 @@
     -->
     
     <!--
-        Run target > Other targets > package-for-store
+        Run target > Other targets > BigJar
     -->
     
     <target name="BigJar" depends="jar">
