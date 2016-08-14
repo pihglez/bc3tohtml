@@ -89,4 +89,8 @@ public class LineaComandos {
      * Nombre del archivo de salida (distinto al de defecto)
      */
     public static String nombreArchivoSalida;
+    /**
+     * Activa la apertura de la web oficial del software en el navegador
+     */
+    public static boolean abrirWeb                  = true;
 }

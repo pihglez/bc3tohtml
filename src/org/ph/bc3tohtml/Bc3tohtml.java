@@ -16,7 +16,11 @@
  */
 package org.ph.bc3tohtml;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -36,7 +40,7 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v.0.4.1.0";
+    public static final String  BC3TOHTMLVERSION    = "v.0.5.0.0";
     /**
      * En esta constante se almacena el nombre original del software
      */
@@ -54,7 +58,7 @@ public class Bc3tohtml {
         
         
         opciones = new Options();
-        setCommanLineOptions();
+        setCommandLineOptions();
         
         testArgs(args);
     }
@@ -66,8 +70,10 @@ public class Bc3tohtml {
      */
     private static void testArgs(String[] args) throws ErrorInArgumentsException {
         
+        //<editor-fold defaultstate="collapsed" desc="Gestión de la línea de comandos">
         try {
             CommandLine cmd = new DefaultParser().parse(opciones, args);
+            LineaComandos.abrirWeb = abrirWeb(cmd);
             switch (args.length) {
                 case 0:
                     System.out.println(Ayuda.INFO + Ayuda.DESCRIPCION);
@@ -80,17 +86,17 @@ public class Bc3tohtml {
                     
                     if (argumentIsFileName(args[0]))                procesarArchivo(args[0]);
                     break;
-                case 2:
-                    if (cmd.hasOption("y")) {
-                        String archivo;
-                        LineaComandos.asumirRespuestaPositiva = true;
-                        if(args[0].toLowerCase().contains("y") && args[0].length() == 1 ) {
-                                archivo = args[1];
-                        } else  archivo = args[0];
-                        if (argumentIsFileName(archivo))            procesarArchivo(archivo);
-                    } else {
-                        throw new ErrorInArgumentsException("Parece que ha introducido un número incorrecto de argumentos. Por favor, verifique la ayuda.");
-                    }
+//                case 2:
+//                    if (cmd.hasOption("y")) {
+//                        String archivo;
+//                        LineaComandos.asumirRespuestaPositiva = true;
+//                        if(args[0].toLowerCase().contains("y") && args[0].length() == 1 ) {
+//                                archivo = args[1];
+//                        } else  archivo = args[0];
+//                        if (argumentIsFileName(archivo))            procesarArchivo(archivo);
+//                    } else {
+//                        throw new ErrorInArgumentsException("Parece que ha introducido un número incorrecto de argumentos. Por favor, verifique la ayuda.");
+//                    }
                 default:
                     if (args.length > 2) {
                         // bc3tohtml -f archivo.bc3 -o archivo.html
@@ -105,7 +111,18 @@ public class Bc3tohtml {
         } catch (ParseException ex) {
             System.out.println("Error al leer la línea de comandos: " + ex.getLocalizedMessage());
         }
+        //</editor-fold>
         
+    }
+    
+    /**
+     * Este método devuelve <code>true</code> en el caso de que se deba abrir
+     * la web del programa y <code>false</code> en caso contrario.
+     * @param args <code>String[]</code> La lista de argumentos introducida.
+     * @return <code>boolean</code> True en caso de que se pueda abrir la web y False en el contrario.
+     */
+    private static boolean abrirWeb(CommandLine cmd) {
+        return !cmd.hasOption("noweb");
     }
     
     /**
@@ -146,7 +163,7 @@ public class Bc3tohtml {
     /**
      * Este método establece las opciones reconocibles a través de la línea de comandos.
      */
-    private static void setCommanLineOptions(){
+    private static void setCommandLineOptions(){
         opciones.addOption("?", false,  "Muestra esta ayuda");                                                      // ayuda
         opciones.addOption("b", false,  "Genera un presupuesto ciego (sin precios ni importes)");                   // presupuesto ciego
         opciones.addOption("d", false,  "Genera un documento sólo con los precios descompuestos");                  // solo descompuestos
@@ -165,6 +182,7 @@ public class Bc3tohtml {
         opciones.addOption("z", false,  "Muestra la licencia del software");                                        // muestra la licencia
         opciones.addOption("i", false,  "Muestra información del sistema");                                         // muestra información del sistema
         opciones.addOption("c", false,  "Fuerza la lectura de archivos en codificación Windows\"Cp1252\"");         // fuerza lectura archivo bc3 codificación Windows Cp1252
+        opciones.addOption("noweb", false,  "Evita la apertura del navegador durante la transformación.");          // fuerza lectura archivo bc3 codificación Windows Cp1252
     }
     
     /**
@@ -250,6 +268,9 @@ public class Bc3tohtml {
             // se cumplen las condiciones --> se realiza el proceso del archivo .bc3
             System.out.println("Procesando archivo " + LineaComandos.nombreArchivoAProcesar +
                     " --> " + LineaComandos.nombreArchivoSalida);
+            
+            
+            if (LineaComandos.abrirWeb) WebOficialBc3ToHtml.open();
             
             BC3File bc3f = new BC3File(LineaComandos.nombreArchivoAProcesar);
             if (bc3f.procesaBC3()) {
