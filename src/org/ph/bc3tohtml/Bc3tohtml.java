@@ -17,8 +17,6 @@
 package org.ph.bc3tohtml;
 
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -38,7 +36,7 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v.0.5.0.0";
+    public static final String  BC3TOHTMLVERSION    = "v.0.5.0.1";
     /**
      * En esta constante se almacena el nombre original del software
      */
@@ -159,28 +157,29 @@ public class Bc3tohtml {
     }
     
     /**
-     * Este método establece las opciones reconocibles a través de la línea de comandos.
+     * Este método establece las opciones (<code>argumentos</code>) reconocibles
+     * a través de la línea de comandos.
      */
     private static void setCommandLineOptions(){
         opciones.addOption("?", false,  "Muestra esta ayuda");                                                      // ayuda
         opciones.addOption("b", false,  "Genera un presupuesto ciego (sin precios ni importes)");                   // presupuesto ciego
-        opciones.addOption("d", false,  "Genera un documento sólo con los precios descompuestos");                  // solo descompuestos
-        opciones.addOption("e", false,  "Genera un documento sólo con las entidades de la BBDD");                   // solo elementales
-        opciones.addOption("f", true,   "Especifica a continuación el archivo de entrada (.bc3)");                  // archivo (file) de entrada
-        opciones.addOption("l", true,   "Especifica a continuación el archivo de volcado (.log)");                  // archivo (log) de volcado
+        opciones.addOption("d", false,  "Genera un documento solo con los precios descompuestos");                  // solo descompuestos
+        opciones.addOption("e", false,  "Genera un documento solo con las entidades de la BBDD");                   // solo elementales
+        opciones.addOption("f", true,   "Especifica a continuacion el archivo de entrada (.bc3)");                  // archivo (file) de entrada
+        opciones.addOption("l", true,   "Especifica a continuacion el archivo de volcado (.log)");                  // archivo (log) de volcado
         opciones.addOption("m", false,  "Incluye las mediciones en el presupuesto");                                // incluir mediciones
-        opciones.addOption("o", true,   "Especifica a continuación el archivo de salida (.html)");                  // archivo (output) de salida
-        opciones.addOption("p", false,  "Genera el presupuesto (opción por defecto con un solo argumento)");        // incluir presupuesto
+        opciones.addOption("o", true,   "Especifica a continuacion el archivo de salida (.html)");                  // archivo (output) de salida
+        opciones.addOption("p", false,  "Genera el presupuesto (opcion por defecto con un solo argumento)");        // incluir presupuesto
         opciones.addOption("r", false,  "Genera el resumen de presupuesto");                                        // incluir resumen
-        opciones.addOption("s", false,  "Muestra estadísticas");                                                    // mostrar estadísticas
-        opciones.addOption("t", true,   "Especifica a continuación el archivo de plantilla a utilizar (.html)");    // archivo (template) a utilizar
-        opciones.addOption("v", false,  "Muestra la versión del sofware");                                          // muestra la versión del software
-        opciones.addOption("w", false,  "Activa el modo de información adicional (verbose)");                       // muestra la versión del software
-        opciones.addOption("y", false,  "Asume una respuesta positiva a las posibles preguntas");                   // asumir sí (yes) a cualquier pregunta
+        opciones.addOption("s", false,  "Muestra estadisticas al terminar el proceso");                             // mostrar estadisticas
+        opciones.addOption("t", true,   "Especifica a continuacion el archivo de plantilla a utilizar (.html)");    // archivo (template) a utilizar
+        opciones.addOption("v", false,  "Muestra la version del sofware");                                          // muestra la version del software
+        opciones.addOption("w", false,  "Activa el modo de informacion adicional (verbose)");                       // muestra la version del software
+        opciones.addOption("y", false,  "Asume una respuesta positiva a las posibles preguntas");                   // asumir si (yes) a cualquier pregunta
         opciones.addOption("z", false,  "Muestra la licencia del software");                                        // muestra la licencia
-        opciones.addOption("i", false,  "Muestra información del sistema");                                         // muestra información del sistema
-        opciones.addOption("c", false,  "Fuerza la lectura de archivos en codificación Windows\"Cp1252\"");         // fuerza lectura archivo bc3 codificación Windows Cp1252
-        opciones.addOption("noweb", false,  "Evita la apertura del navegador durante la transformación.");          // fuerza lectura archivo bc3 codificación Windows Cp1252
+        opciones.addOption("i", false,  "Muestra informacion del sistema");                                         // muestra informacion del sistema
+        opciones.addOption("c", false,  "Fuerza la lectura de archivos en codificacion Windows\"Cp1252\"");         // fuerza lectura archivo bc3 codificacion Windows Cp1252
+        opciones.addOption("noweb", false,  "Evita la apertura del navegador durante la transformacion.");          // evita que la utilizacion del software abra una ventana hacia la web principal del mismo.
     }
     
     /**
@@ -210,6 +209,9 @@ public class Bc3tohtml {
         System.out.println(sp.toConsoleString(false));
     }
     
+    /**
+     * Muestra la información de versión del software
+     */
     private static void showAppVersion() {
         System.out.println(""
                 + "Nombre:    " + APPNAME + "\n"
@@ -233,6 +235,11 @@ public class Bc3tohtml {
         return figureOutArchive;
     }
     
+    /**
+     * Este método se apoya en la clase estática LineaComandos para procesar el
+     * archivo de entrada (BC3) en función de los distintos argumentos de la
+     * línea de comandos introducidos por el usuario.
+     */
     private static void procesarArchivo() {
         try {
             // el archivo de entrada debe existir y ser accesible
@@ -309,6 +316,13 @@ public class Bc3tohtml {
         procesarArchivo();
     }
     
+    /**
+     * Este método gestiona los argumentos introducidos por el usuario
+     * ayudándose de la librería de Apache Commons CLI, definiendo distintas
+     * variables accesibles a través de la clase estática <code>LineaComandos</code>.
+     * @param cmd <code>CommandLine</code> La línea de comandos introducida por 
+     * el usuario.
+     */
     private static void gestionaArgumentos(CommandLine cmd) {
         if(cmd.hasOption("f")){
             LineaComandos.nombreArchivoAProcesar    = cmd.getOptionValue("f");

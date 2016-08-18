@@ -46,7 +46,6 @@ import org.ph.bc3Format.Registro_T_texto;
 import org.ph.bc3Format.Registro_V_prpdad;
 import org.ph.errors.ErrorInFormatException;
 import org.ph.loggerToFile.Bc3ParserLogger;
-import org.ph.xmlFormat.BcxFormatDefinition;
 
 /**
  *
@@ -80,6 +79,11 @@ public class BC3File {
         this.bc3FileToProcess = fileName;
     }
     
+    /**
+     * Lee línea a línea y procesa el archivo BC3 y lee el archivo de plantilla HTML
+     * @return <code>boolean</code> true en caso de que el procesamiento se realice correctamente y false en caso contrario
+     * @throws ErrorInFormatException En el caso de que el formato no se ajuste a lo previsto
+     */
     public boolean procesaBC3() throws ErrorInFormatException {
         double tt;
         long t0, t1;
@@ -111,13 +115,15 @@ public class BC3File {
                 
                 StringBuilder sb    = new StringBuilder();
                 
-                rCodigos            = new ArrayList <Registro_C_concepto>();
-                rDescompuestos      = new ArrayList <Registro_D_descomposicion>();
-                rTextos             = new ArrayList <Registro_T_texto>();
-                rMediciones         = new ArrayList <Registro_M_mediciones>();
-                rPliegos            = new ArrayList <Registro_L_pliegos>();
-                rInformaGrafica     = new ArrayList <Registro_G_informacionGrafica>();
-                rEntidades          = new ArrayList <Registro_E_entidad>();
+                // <editor-fold defaultstate="expanded" desc=" Almacenamiento de datos provenientes del formato BC3 ">
+                rCodigos = new ArrayList<>();
+                rDescompuestos = new ArrayList<>();
+                rTextos = new ArrayList<>();
+                rMediciones = new ArrayList<>();
+                rPliegos = new ArrayList<>();
+                rInformaGrafica = new ArrayList<>();
+                rEntidades = new ArrayList<>();
+                // </editor-fold>
                 
                 if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Variables de almacenamiento establecidas.");
                 
@@ -381,9 +387,7 @@ public class BC3File {
                 trabajoRealizadoOK = conceptoAHTML(cuerpoTabla, filaDatos, getConceptoRaiz());
             }
             
-            
             filaDatos.remove();
-            
             
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(LineaComandos.nombreArchivoSalida), "UTF-8"));
             writer.append(archivoHtml.outerHtml());
@@ -409,6 +413,11 @@ public class BC3File {
         return getResumenDeCodigo(getConceptoRaiz());
     }
     
+    /**
+     * A partir de un código, devuelve el texto (descriptivo) asociado al mismo
+     * @param codigo <code>String</code> El código cuyo texto se quiere obtener
+     * @return <code>String</code> El texto descriptivo asociado al código.
+     */
     private String getTextoDeCodigo(String codigo) {
         StringBuilder s = new StringBuilder();
         for (Registro_T_texto rtt : rTextos) {
@@ -420,6 +429,11 @@ public class BC3File {
         return s.toString();
     }
     
+    /**
+     * A partir de un código, devuelve el texto resumen asociado al mismo.
+     * @param codigo <code>String</code> El código cuyo resumen se quiere obtener.
+     * @return <code>String</code> El resumen asociado al código.
+     */
     private String getResumenDeCodigo(String codigo) {
         String s = "";
         for (Registro_C_concepto rcc : rCodigos){
@@ -433,9 +447,9 @@ public class BC3File {
     
     /**
      * Método que, a partir del código del concepto, devuelve la medición total
-     * del mismo
-     * @param codigoConcepto <code>String</code> El código del concepto cuya medición se busca
-     * @return <code>double</code> El valor de la medición cuyo código es <code>codigoConcepto</code>
+     * del mismo.
+     * @param codigoConcepto <code>String</code> El código del concepto cuya medición se busca.
+     * @return <code>double</code> El valor de la medición cuyo código es <code>codigoConcepto</code>.
      */
     private double getMedicionTotalDeCodigo(String codigoConcepto) {
         double d = 0d;
@@ -450,6 +464,11 @@ public class BC3File {
         return d;
     }
     
+    /**
+     * Método que, a partir del código del concepto, devuelve el precio asociado al mismo.
+     * @param codigo <code>String</code> El código cuyo precio se quiere obtener.
+     * @return <code>double</code> El precio asociado al código.
+     */
     private double getPrecioDeCodigo(String codigo) {
         double d = 0d;
         for (Registro_C_concepto concepto : rCodigos) {
@@ -461,6 +480,11 @@ public class BC3File {
         return d;
     }
     
+    /**
+     * Método que, a partir del código del concepto, devuelve la unidad asociada al concepto
+     * @param codigo <code>String</code> El código cuya unidad se quiere obtener.
+     * @return <code>String</code> La unidad asociada al código.
+     */
     private String getUnidadDeCodigo (String codigo) {
         String s = "";
         for (Registro_C_concepto rcc : rCodigos){
@@ -472,6 +496,11 @@ public class BC3File {
         return s;
     }
     
+    /**
+     * Método que devuelve el concepto raíz del presupuesto.
+     * A partir de este concepto raíz, se estructura, a modo de árbol, el presupuesto.
+     * @return <code>String</code> El concepto raíz del presupuesto.
+     */
     private String getConceptoRaiz() {
         String s = "";
         for (Registro_C_concepto rcc : rCodigos){
@@ -483,6 +512,12 @@ public class BC3File {
         return s;
     }
     
+    /**
+     * Método por implementar.
+     * A partir del código del concepto, se devuelven las mediciones asociadas al mismo.
+     * @param concepto <code>String</code> El código del concepto del que se quieren obtener las mediciones.
+     * @return <code>ArrayList</code> Las mediciones asociadas al concepto.
+     */
     private ArrayList getLineasMedicion(String concepto) {
         ArrayList<LineaMedicion> mediciones;
         mediciones = new ArrayList<>();
@@ -491,6 +526,11 @@ public class BC3File {
         return mediciones;
     }
     
+    /**
+     * A partir del código del concepto, devuelve, en caso de que los tenga, los conceptos hijos asociados al mismo.
+     * @param codigo <code>String</code> El código del concepto del que se quieren obtener los conceptos hijos.
+     * @return <code>ArrayList</code> Los conceptos hijos asociados al concepto.
+     */
     private ArrayList getCodigosHijos(String codigo) {
         for (Registro_D_descomposicion desc : rDescompuestos) {
             if (desc.getCodigoPadre().trim().equals(codigo)) {
@@ -500,6 +540,12 @@ public class BC3File {
         return null;
     }
     
+    /**
+     * Método que genera el texto que compondrá el encabezado del archivo HTML
+     * generado en función de los requermientos del usuario a través de la línea
+     * de comandos.
+     * @return <code>String</code> El texto del encabezado
+     */
     private String getTextoEncabezado() {
         StringBuilder s = new StringBuilder();
         if (LineaComandos.generarPresupuesto) s.append("Presupuesto");
@@ -592,6 +638,14 @@ public class BC3File {
         }
     }
     
+    /**
+     * Este método compone la información que se le ofrece al usuario como estadísticas del proceso.
+     * @param t0 <code>long</code>
+     * @param t1 <code>long</code>
+     * @param tt <code>long</code> Tiempo total de duración del proceso.
+     * @param numLineaLeida <code>int</code> Número de líneas leídas.
+     * @return <code>StringBuilder</code> La composición de estadísticas asociadas al proceso de lectura y composición del archivo HTML
+     */
     private StringBuilder getEstadisticasProcesoArchivoBc3(long t0, long t1, double tt, int numLineaLeida) {
         StringBuilder statistics = new StringBuilder();
                     
@@ -609,6 +663,13 @@ public class BC3File {
         return statistics;
     }
     
+    /**
+     * Implementación preliminar
+     * @param cuerpoTabla
+     * @param filaDatos
+     * @param codigoConcepto
+     * @return 
+     */
     private boolean conceptoAHTML(Element cuerpoTabla, Element filaDatos, String codigoConcepto) {
         numBucles++;
         
