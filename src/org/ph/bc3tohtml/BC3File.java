@@ -27,7 +27,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
-import org.jsoup.Jsoup;
+import org.jsoup.Jsoup;                                 // java >= 1.5
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.ph.System.FileManage;
