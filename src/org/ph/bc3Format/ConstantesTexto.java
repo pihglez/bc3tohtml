@@ -34,4 +34,33 @@ public class ConstantesTexto {
      * Divisor entre elementos del mismo tipo
      */
     public static final String divisor = "\\\\";
+    
+    /**
+     * Matriz de constantes de texto de encabezado de línea según la codificación
+     * del formato BC3
+     * "~V": // propiedad y version
+     * "~K": // coeficientes
+     * "~C": // concepto
+     * "~D": // descomposición
+     * "~Y": // añadir descomposición
+     * "~R": // descomposición de residuos
+     * "~T": // texto
+     * "~P": // paramétrica
+     * "~L": // pliegos
+     * "~Q": // pliegos (modelo 2)
+     * "~J": // pliegos (modelo 2+)
+     * "~W": // ámbito geográfico
+     * "~G": // información gráfica
+     * "~E": // entidad
+     * "~O": // relación comercial
+     * "~X": // información técnica
+     * "~M": // mediciones
+     * "~N": // añadir mediciones
+     * "~A": // claves
+     * "~B": // cambio de código
+     * "~F": // documento adjunto
+     */
+    public static final String[] bc3Codes = {"~V", "~K", "~C", "~D", "~Y", "~R",
+        "~T", "~P", "~L", "~Q", "~J", "~W", "~G", "~E", "~O", "~X", "~M", "~N", 
+        "~A", "~B", "~F"};
 }

@@ -17,8 +17,6 @@
 package org.ph.xmlFormat;
 
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -368,9 +366,11 @@ public class BcxFormatDefinition {
 
             transformer.transform(source, result);
             
-        } catch (ParserConfigurationException | TransformerConfigurationException ex) {
+        } catch (ParserConfigurationException  ex) { // NO (ParserConfigurationException | TransformerConfigurationException ex) para compatibilidad con Java 6
             System.out.println("Error XML: " + ex.getLocalizedMessage());
-        } catch (TransformerException ex) {
+        } catch (TransformerConfigurationException ex) {
+            System.out.println("Error XML: " + ex.getLocalizedMessage());
+        }catch (TransformerException ex) {
             System.out.println("Error de transformación de XML: " + ex.getLocalizedMessage());
         }
     }

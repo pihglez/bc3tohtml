@@ -36,7 +36,7 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v.0.5.0.1";
+    public static final String  BC3TOHTMLVERSION    = "v.0.5.0.2";
     /**
      * En esta constante se almacena el nombre original del software
      */
@@ -282,7 +282,9 @@ public class Bc3tohtml {
                 System.out.println("Proceso finalizado correctamente.");
                 if (LineaComandos.modoVerbose) System.out.println("Archivo de salida: " + LineaComandos.nombreArchivoSalida);
             }
-        } catch (ErrorInFormatException|ErrorInArgumentsException ex) {
+        } catch (ErrorInFormatException ex) { // catch (ErrorInFormatException|ErrorInArgumentsException ex)
+            System.out.println("Error irrecuperable: " + ex.getMessage());
+        } catch (ErrorInArgumentsException ex) {
             System.out.println("Error irrecuperable: " + ex.getMessage());
         }
     }

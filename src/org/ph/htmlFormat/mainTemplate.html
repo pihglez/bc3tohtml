@@ -85,7 +85,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             .ph-hidden {visibility: hidden;}
         </style>
         <script type="text/javascript">
+            // esto es una prueba tomada de http://www.justexample.com/wp/expand-and-collapse-html-list/
+            // hacer los ajustes necesarios para que funcione correctamente
+            // otra opción sería utilizar el código que se muestra en la dirección http://jdstiles.com/java/expandcollapsesections.html
             
+            var allSpan = document.getElementsById('filadatos');
+            for(var i = 0; i < allSpan.length; i++){
+                allSpan[i].onclick=function(){
+                    if(this.parentNode){
+                        var childList = this.parentNode.getElementsByTagName('UL');
+                        for(var j = 0; j< childList.length;j++){
+                            var currentState = childList[j].style.display;
+                            if(currentState=="none"){
+                                childList[j].style.display="block";
+                            }else{
+                                childList[j].style.display="none";
+                            }
+                        }
+                    }
+                }
+            }
         </script>
     </head>
     <body>

@@ -38,7 +38,7 @@ public class Registro_D_descomposicion {
     
     public Registro_D_descomposicion (String[] linea){
         this.codigoPadre = linea[1];
-        this.descomp = new ArrayList<>();
+        this.descomp = new ArrayList<CodigoHijo>();
         
         String[] hijosDatos = StrUtils.split(linea[2], '\\');
         

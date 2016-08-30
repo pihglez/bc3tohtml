@@ -36,7 +36,11 @@ public class WebOficialBc3ToHtml {
                     Desktop desktop = Desktop.getDesktop();
                     URI uri = new URI( DIRECCION );
                     desktop.browse(uri);
-                } catch (IOException|URISyntaxException ex) {
+                } catch (IOException ex) {
+                    System.out.println("No se ha podido abrir la página. " + ex.getLocalizedMessage());
+                    System.out.println("Por favor, diríjase a la página " + getDIRECCION() + 
+                            " para más información.");
+                } catch (URISyntaxException ex) {
                     System.out.println("No se ha podido abrir la página. " + ex.getLocalizedMessage());
                     System.out.println("Por favor, diríjase a la página " + getDIRECCION() + 
                             " para más información.");
@@ -44,7 +48,7 @@ public class WebOficialBc3ToHtml {
             }
         };
 
-    thread.start();
+        thread.start();
         
         return true;
     }

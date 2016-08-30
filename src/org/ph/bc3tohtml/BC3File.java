@@ -116,13 +116,13 @@ public class BC3File {
                 StringBuilder sb    = new StringBuilder();
                 
                 // <editor-fold defaultstate="expanded" desc=" Almacenamiento de datos provenientes del formato BC3 ">
-                rCodigos = new ArrayList<>();
-                rDescompuestos = new ArrayList<>();
-                rTextos = new ArrayList<>();
-                rMediciones = new ArrayList<>();
-                rPliegos = new ArrayList<>();
-                rInformaGrafica = new ArrayList<>();
-                rEntidades = new ArrayList<>();
+                rCodigos        = new ArrayList<Registro_C_concepto>();
+                rDescompuestos  = new ArrayList<Registro_D_descomposicion>();
+                rTextos         = new ArrayList<Registro_T_texto>();
+                rMediciones     = new ArrayList<Registro_M_mediciones>();
+                rPliegos        = new ArrayList<Registro_L_pliegos>();
+                rInformaGrafica = new ArrayList<Registro_G_informacionGrafica>();
+                rEntidades      = new ArrayList<Registro_E_entidad>();
                 // </editor-fold>
                 
                 if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Variables de almacenamiento establecidas.");
@@ -156,57 +156,57 @@ public class BC3File {
                         datosLinea = sb.toString().split(ConstantesTexto.separador);
                         
                         // <editor-fold defaultstate="expanded" desc=" switch de proceso de cabecera de línea ">
-                        switch (datosLinea[0].toUpperCase()) {
-                            case "~V": // propiedad y version
+                        switch (getDecodedBc3Code(datosLinea[0].toUpperCase())) {
+                            case 0: // propiedad y version
                                 procesa_V(datosLinea);
                                 break;
-                            case "~K": // coeficientes
+                            case 1: // coeficientes
                                 procesa_K(datosLinea);
                                 break;
-                            case "~C": // concepto
+                            case 2: // concepto
                                 procesa_C(datosLinea);
                                 break;
-                            case "~D": // descomposición
+                            case 3: // descomposición
                                 procesa_D(datosLinea);
                                 break;
-                            case "~Y": // añadir descomposición
+                            case 4: // añadir descomposición
                                 break;
-                            case "~R": // descomposición de residuos
+                            case 5: // descomposición de residuos
                                 break;
-                            case "~T": // texto
+                            case 6: // texto
                                 procesa_T(datosLinea);
                                 break;
-                            case "~P": // paramétrica
+                            case 7: // paramétrica
                                 break;
-                            case "~L": // pliegos
+                            case 8: // pliegos
                                 procesa_L(datosLinea);
                                 break;
-                            case "~Q": // pliegos (modelo 2)
+                            case 9: // pliegos (modelo 2)
                                 break;
-                            case "~J": // pliegos (modelo 2+)
+                            case 10: // pliegos (modelo 2+)
                                 break;
-                            case "~W": // ámbito geográfico
+                            case 11: // ámbito geográfico
                                 break;
-                            case "~G": // información gráfica
+                            case 12: // información gráfica
                                 procesa_G(datosLinea);
                                 break;
-                            case "~E": // entidad
+                            case 13: // entidad
                                 procesa_E(datosLinea);
                                 break;
-                            case "~O": // relación comercial
+                            case 14: // relación comercial
                                 break;
-                            case "~X": // información técnica
+                            case 15: // información técnica
                                 break;
-                            case "~M": // mediciones
+                            case 16: // mediciones
                                 procesa_M(datosLinea);
                                 break;
-                            case "~N": // añadir mediciones
+                            case 17: // añadir mediciones
                                 break;
-                            case "~A": // claves
+                            case 18: // claves
                                 break;
-                            case "~B": // cambio de código
+                            case 19: // cambio de código
                                 break;
-                            case "~F": // documento adjunto
+                            case 20: // documento adjunto
                                 break;
                             default:
                                        // ¿?
@@ -261,6 +261,13 @@ public class BC3File {
         }
 //        conversion = true;
         return conversion;
+    }
+    
+    private int switchLineHeader (String lineHeader){
+        int sLH = 0;
+        
+        
+        return sLH;
     }
     
     /**
@@ -520,7 +527,7 @@ public class BC3File {
      */
     private ArrayList getLineasMedicion(String concepto) {
         ArrayList<LineaMedicion> mediciones;
-        mediciones = new ArrayList<>();
+        mediciones = new ArrayList<LineaMedicion>();
         // implementar
         
         return mediciones;
@@ -794,5 +801,25 @@ public class BC3File {
         }
         
         return ((s.length() == 0) ? codigoDescomposicion : s);
+    }
+    
+    /**
+     * Por compatibilidad con Java 1.6<br/>
+     * A partir de la codificación de la línea en cada caso, se compara con la
+     * codificación de <code>ConstantesTexto.bc3Codes</code> y devuelve el número
+     * de la matriz en la que se encuentra la coincidencia. En caso de que no se
+     * encuentre coincidencia, se devuelve el valor <code>-1</code>.
+     * @param code <code>String</code> El código de comienzo de línea en base a 
+     * la definición del formato BC3.
+     * @return <code>int</code> La coincidencia con <code>ConstantesTexto.bc3Codes
+     * </code> y <code>-1</code> en el caso de que no se encuentre. Como matriz,
+     * su número se inicia en 0.
+     */
+    private int getDecodedBc3Code (String code) {
+        int codigo = -1;
+        for (int i = 0; i < ConstantesTexto.bc3Codes.length; i++) {
+            if (ConstantesTexto.bc3Codes[i].equals(code)) {codigo = i; break;}
+        }
+        return codigo;
     }
 }
