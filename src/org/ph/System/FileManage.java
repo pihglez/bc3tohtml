@@ -28,7 +28,7 @@ public class FileManage {
     /**
      * Comprueba si el archivo de nombre 'filename' puede ser leído, es un archivo, existe y no es un directorio.
      * @param fileName la ruta completa del archivo
-     * @return <code>true</code> en el caso de que se cumplan las condiciones y false en caso contrario
+     * @return <code>true</code> en el caso de que se cumplan las condiciones y <code>false</code> en caso contrario
      */
     public static boolean isFileAvailable (String fileName) {
         File f = new File(fileName);

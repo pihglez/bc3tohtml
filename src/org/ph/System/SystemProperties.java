@@ -24,6 +24,7 @@ public class SystemProperties {
     public final String                     javaVendor;
     public final String                     javaVendorURL;
     public final String                     javaVersion;
+    public final String                     javaClassPath;
     
     public final String                     fileSep;
     public final String                     lineSeparator;
@@ -43,6 +44,7 @@ public class SystemProperties {
         javaVendor =    System.getProperty("java.vendor");
         javaVendorURL = System.getProperty("java.vendor.url");
         javaVersion =   System.getProperty("java.version");
+        javaClassPath = System.getProperty("java.class.path");
         
         fileSep =       System.getProperty("file.separator");
         lineSeparator = System.getProperty("line.separator");
@@ -67,6 +69,7 @@ public class SystemProperties {
         sb.append(((oSName.toLowerCase().contains("mac")) ? " (mac OS)" : ""));
         sb.append("\n\n");
         
+        sb.append("ClassPath de java: ");               sb.append(javaClassPath);   sb.append("\n");
         sb.append("Vendedor de java: ");                sb.append(javaVendor);      sb.append("\n");
         sb.append("URL del vendedor de java: ");        sb.append(javaVendorURL);   sb.append("\n");
         sb.append("Versión de java: ");                 sb.append(javaVersion);     sb.append("\n\n");

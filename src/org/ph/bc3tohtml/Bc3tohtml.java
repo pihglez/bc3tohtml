@@ -83,6 +83,7 @@ public class Bc3tohtml {
                     if (argumentIsFileName(args[0]))                procesarArchivo(args[0]);
                     break;
 //                case 2:
+//                    // situación en la que, un elemento es el archivo y se considera una única opción adicional
 //                    if (cmd.hasOption("y")) {
 //                        String archivo;
 //                        LineaComandos.asumirRespuestaPositiva = true;
@@ -95,8 +96,6 @@ public class Bc3tohtml {
 //                    }
                 default:
                     if (args.length > 2) {
-                        // bc3tohtml -f archivo.bc3 -o archivo.html
-                        // bc3tohtml -f archivo.bc3 -p                          // se presupone equivalente a --> bc3tohtml archivo.bc3 (implementar)
                         gestionaArgumentos(cmd);
                     } else {
                         System.out.println(Ayuda.INFO + Ayuda.DESCRIPCION);
@@ -275,7 +274,7 @@ public class Bc3tohtml {
                     " --> " + LineaComandos.nombreArchivoSalida);
             
             
-            if (LineaComandos.abrirWeb) WebOficialBc3ToHtml.open();
+            if (LineaComandos.abrirWeb) WebOficialBc3ToHtml.open();     // el hilo debe informar si la web se abre correctamente y entonces pasa algo en caso contrario
             
             BC3File bc3f = new BC3File(LineaComandos.nombreArchivoAProcesar);
             if (bc3f.procesaBC3()) {

@@ -17,6 +17,7 @@
 package org.ph.xmlFormat;
 
 import java.io.File;
+import java.util.Date;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,23 +40,26 @@ public class BcxFormatDefinition {
     DocumentBuilder docBuilder;
     Document doc;
     
+    /**
+     * Definición del formato BCX
+     */
     public BcxFormatDefinition () {
         try {
             docFactory = DocumentBuilderFactory.newInstance();
             docBuilder = docFactory.newDocumentBuilder();
             
             doc = docBuilder.newDocument();
-            Element grupo = doc.createElement("grupo");
+            Element grupo = doc.createElement(              "grupo");
             doc.appendChild(grupo);
             
-            Element codigo_grupo = doc.createElement("codigo-grupo");
+            Element codigo_grupo = doc.createElement(       "codigo-grupo");
             codigo_grupo.setTextContent(RandomGenerator.getRandomAlphaNumericString(13));
             grupo.appendChild(codigo_grupo);
-            Element descripcion = doc.createElement("descripcion");
+            Element descripcion = doc.createElement(        "descripcion");
             grupo.appendChild(descripcion);
-            Element fecha_grupo = doc.createElement("fecha-grupo");
+            Element fecha_grupo = doc.createElement(        "fecha-grupo");
             grupo.appendChild(fecha_grupo);
-            Element obra = doc.createElement("obra");
+            Element obra = doc.createElement(               "obra");
             grupo.appendChild(obra);
             
             // <editor-fold defaultstate="expanded" desc=" DATOS-GENERALES ">
@@ -110,7 +114,7 @@ public class BcxFormatDefinition {
                 coeficientes_obra.appendChild(dc_coeficiente);
             Element dm_coeficiente = doc.createElement(       "dm");
                 coeficientes_obra.appendChild(dm_coeficiente);
-            Element divisa_coeficiente = doc.createElement(       "divisa");
+            Element divisa_coeficiente = doc.createElement(   "divisa");
                 coeficientes_obra.appendChild(divisa_coeficiente);
             Element ci_coeficiente = doc.createElement(       "ci");
                 coeficientes_obra.appendChild(ci_coeficiente);
@@ -118,7 +122,7 @@ public class BcxFormatDefinition {
                 coeficientes_obra.appendChild(gg_coeficiente);
             Element bi_coeficiente = doc.createElement(       "bi");
                 coeficientes_obra.appendChild(bi_coeficiente);
-            Element baja_coeficiente = doc.createElement(       "baja");
+            Element baja_coeficiente = doc.createElement(      "baja");
                 coeficientes_obra.appendChild(baja_coeficiente);
             Element iva_coeficiente = doc.createElement(       "iva");
                 coeficientes_obra.appendChild(iva_coeficiente);
@@ -144,9 +148,9 @@ public class BcxFormatDefinition {
                 coeficientes_obra.appendChild(dsp_coeficiente);
             Element dec_coeficiente = doc.createElement(       "dec");
                 coeficientes_obra.appendChild(dec_coeficiente);
-            Element divisa2_coeficiente = doc.createElement(       "divisa2");
+            Element divisa2_coeficiente = doc.createElement(   "divisa2");
                 coeficientes_obra.appendChild(divisa2_coeficiente);
-            Element n_coeficiente = doc.createElement(       "n");
+            Element n_coeficiente = doc.createElement(         "n");
                 coeficientes_obra.appendChild(n_coeficiente);
             // </editor-fold>
             // </editor-fold>
@@ -256,57 +260,57 @@ public class BcxFormatDefinition {
                     Element arbolprecios_linea = doc.createElement("arbol-precios");
                     linea_medicion.appendChild(arbolprecios_linea);
             // pliego
-            Element pliego_concepto = doc.createElement("pliego");
+            Element pliego_concepto = doc.createElement(            "pliego");
             concepto.appendChild(pliego_concepto);
-                Element codigoseccion_pliego = doc.createElement("codigo-seccion");
+                Element codigoseccion_pliego = doc.createElement(   "codigo-seccion");
                 pliego_concepto.appendChild(codigoseccion_pliego);
-                Element rotuloseccion_pliego = doc.createElement("rotulo-seccion");
+                Element rotuloseccion_pliego = doc.createElement(   "rotulo-seccion");
                 pliego_concepto.appendChild(rotuloseccion_pliego);
-                Element textoseccion_pliego = doc.createElement("texto-seccion");
+                Element textoseccion_pliego = doc.createElement(    "texto-seccion");
                 pliego_concepto.appendChild(textoseccion_pliego);
-                Element descripcion_pliego = doc.createElement("descripcion");
+                Element descripcion_pliego = doc.createElement(     "descripcion");
                 pliego_concepto.appendChild(descripcion_pliego);
-                Element requisitos_pliego = doc.createElement("requisitos");
+                Element requisitos_pliego = doc.createElement(      "requisitos");
                 pliego_concepto.appendChild(requisitos_pliego);
-                Element componentes_pliego = doc.createElement("componentes");
+                Element componentes_pliego = doc.createElement(     "componentes");
                 pliego_concepto.appendChild(componentes_pliego);
-                Element ejecucion_pliego = doc.createElement("ejecucion");
+                Element ejecucion_pliego = doc.createElement(       "ejecucion");
                 pliego_concepto.appendChild(ejecucion_pliego);
-                Element normativa_pliego = doc.createElement("normativa");
+                Element normativa_pliego = doc.createElement(       "normativa");
                 pliego_concepto.appendChild(normativa_pliego);
                 Element aceptacionseccion_pliego = doc.createElement("control-aceptacion");
                 pliego_concepto.appendChild(aceptacionseccion_pliego);
-                Element seguridad_pliego = doc.createElement("seguridad-higiene");
+                Element seguridad_pliego = doc.createElement(       "seguridad-higiene");
                 pliego_concepto.appendChild(seguridad_pliego);
-                Element valora_pliego = doc.createElement("valoracion-medicion");
+                Element valora_pliego = doc.createElement(          "valoracion-medicion");
                 pliego_concepto.appendChild(valora_pliego);
-                Element mantenimiento_pliego = doc.createElement("mantenimiento");
+                Element mantenimiento_pliego = doc.createElement(   "mantenimiento");
                 pliego_concepto.appendChild(mantenimiento_pliego);
-                Element varios_pliego = doc.createElement("varios");
+                Element varios_pliego = doc.createElement(          "varios");
                 pliego_concepto.appendChild(varios_pliego);
-                Element rtf_pliego = doc.createElement("archivo-rtf");
+                Element rtf_pliego = doc.createElement(             "archivo-rtf");
                 pliego_concepto.appendChild(rtf_pliego);
-                Element htm_pliego = doc.createElement("archivo-htm");
+                Element htm_pliego = doc.createElement(             "archivo-htm");
                 pliego_concepto.appendChild(htm_pliego);
                 Element ambitogeografico_pliego = doc.createElement("ambito-geografico");
                 pliego_concepto.appendChild(ambitogeografico_pliego);
-                    Element abreviatura_ambito = doc.createElement("abreviatura");
+                    Element abreviatura_ambito = doc.createElement( "abreviatura");
                     ambitogeografico_pliego.appendChild(abreviatura_ambito);
-                    Element ambito = doc.createElement("ambito");
+                    Element ambito = doc.createElement(             "ambito");
                     ambitogeografico_pliego.appendChild(ambito);
             
             // documentos adjuntos
-            Element adjuntos_concepto = doc.createElement("documentos-adjuntos");
+            Element adjuntos_concepto = doc.createElement(                      "documentos-adjuntos");
             concepto.appendChild(adjuntos_concepto);
-                Element archivo_adjunto = doc.createElement("archivo");
+                Element archivo_adjunto = doc.createElement(                    "archivo");
                 adjuntos_concepto.appendChild(archivo_adjunto);
-                    Element archivo_adjunto_tipo = doc.createElement("tipo");
+                    Element archivo_adjunto_tipo = doc.createElement(           "tipo");
                     archivo_adjunto.appendChild(archivo_adjunto_tipo);
-                    Element archivo_adjunto_nombre = doc.createElement("nombre-archivo");
+                    Element archivo_adjunto_nombre = doc.createElement(         "nombre-archivo");
                     archivo_adjunto.appendChild(archivo_adjunto_nombre);
-                    Element archivo_adjunto_descripcion = doc.createElement("descripcion");
+                    Element archivo_adjunto_descripcion = doc.createElement(    "descripcion");
                     archivo_adjunto.appendChild(archivo_adjunto_descripcion);
-                    Element archivo_adjunto_url = doc.createElement("url-exterior");
+                    Element archivo_adjunto_url = doc.createElement(            "url-exterior");
                     archivo_adjunto.appendChild(archivo_adjunto_url);
             
             
@@ -314,7 +318,7 @@ public class BcxFormatDefinition {
             
             // <editor-fold defaultstate="expanded" desc=" ENTIDADES ">
             // entidades
-            Element entidades = doc.createElement("entidades");
+            Element entidades = doc.createElement(          "entidades");
             obra.appendChild(entidades);
             
             // entidad
@@ -356,10 +360,10 @@ public class BcxFormatDefinition {
         
         
             // write the content into xml file
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new File("grupo.xml"));
+            TransformerFactory transformerFactory   = TransformerFactory.newInstance();
+            Transformer transformer                 = transformerFactory.newTransformer();
+            DOMSource source                        = new DOMSource(doc);
+            StreamResult result                     = new StreamResult(new File("grupo.xml"));
 
             // Output to console for testing
             // StreamResult result = new StreamResult(System.out);
@@ -375,13 +379,20 @@ public class BcxFormatDefinition {
         }
     }
     
+    /**
+     * Método que permite escribir el formato BCX en el archivo que se pasa como
+     * parámetro
+     * @param fileName <code>String</code> Nombre del archivo
+     * @return <code>true</code> en el caso de que la escritura se realice correctamente
+     * y <code>false</code> en caso contrario
+     */
     public boolean writeBcx(String fileName) {
         boolean writeOk = false;
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        TransformerFactory transformerFactory   = TransformerFactory.newInstance();
         try {
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new File(fileName));
+            Transformer transformer             = transformerFactory.newTransformer();
+            DOMSource source                    = new DOMSource(doc);
+            StreamResult result                 = new StreamResult(new File(fileName));
             
             transformer.transform(source, result);
             writeOk = true;
@@ -393,5 +404,28 @@ public class BcxFormatDefinition {
         
         
         return writeOk;
+    }    
+    
+    // Estudiar la introducción de los datos generales: modo, raíz, etc.
+    public boolean setDatosGenerales(   String  nombreElemento,
+                                        String  codigo, 
+                                        String  propiedad, 
+                                        String  versionFormato,
+                                        String  version,
+                                        Date    fecha,
+                                        String  programaEmision,
+                                        String  cabecera,
+                                        String  rotuloIdentificacion,
+                                        String  juegoCaracteres,
+                                        String  comentario,
+                                        String  tipoInformacion,
+                                        int     numeroCertificacion,
+                                        Date    fechaCertificacion,
+                                        String  urlBase) {
+        
+        Element elemento = doc.getElementById(nombreElemento);
+        
+        return true;
     }
+    
 }

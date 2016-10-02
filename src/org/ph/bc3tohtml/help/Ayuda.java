@@ -40,7 +40,7 @@ public class Ayuda {
      */
     public static final String DESCRIPCION = ""
             + "Este software transforma un archivo BC3 en uno HTML.\n"
-            + "Uso: java -jar bc3tohtml archivo.bc3\n"
+            + "Uso: java -jar bc3tohtml.jar archivo.bc3\n"
             + "Esto generará como salida 'archivo.html', que podrá ser visualizado con un navegador web standard como Firefox, Opera, Internet Explorer o Safari.\n\n"
-            + "Ejecute 'java -jar bc3tohtml -?' para una información más detallada.\n";
+            + "Ejecute 'java -jar bc3tohtml.jar -?' para una información más detallada.\n";
 }

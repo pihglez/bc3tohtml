@@ -38,4 +38,8 @@ public class SystemEnvironmentVariables {
         
         return sb.toString();
     }
+    
+    public String getVariable(String variableName) {
+        return env.get(variableName);
+    }
 }

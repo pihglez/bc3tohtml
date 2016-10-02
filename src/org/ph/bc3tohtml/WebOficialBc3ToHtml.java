@@ -27,9 +27,10 @@ import java.net.URISyntaxException;
  */
 public class WebOficialBc3ToHtml {
     private static final String DIRECCION = "http://happservicios.wordpress.com/";
+    private static boolean errorAbriendoWeb = false;
     
     public static boolean open() {
-        Thread thread = new Thread(){
+        Thread hiloWeb = new Thread(){
             @Override
             public void run(){
                 try {
@@ -37,23 +38,25 @@ public class WebOficialBc3ToHtml {
                     URI uri = new URI( DIRECCION );
                     desktop.browse(uri);
                 } catch (IOException ex) {
-                    System.out.println("No se ha podido abrir la página. " + ex.getLocalizedMessage());
-                    System.out.println("Por favor, diríjase a la página " + getDIRECCION() + 
-                            " para más información.");
+                    System.out.println("No se ha podido abrir la página. "  + ex.getLocalizedMessage());
+                    System.out.println("Por favor, diríjase a la página "   + getDIRECCIONWEB() + 
+                                       " para más información.");
+                    errorAbriendoWeb = true;
                 } catch (URISyntaxException ex) {
-                    System.out.println("No se ha podido abrir la página. " + ex.getLocalizedMessage());
-                    System.out.println("Por favor, diríjase a la página " + getDIRECCION() + 
-                            " para más información.");
+                    System.out.println("No se ha podido abrir la página. "  + ex.getLocalizedMessage());
+                    System.out.println("Por favor, diríjase a la página "   + getDIRECCIONWEB() + 
+                                       " para más información.");
+                    errorAbriendoWeb = true;
                 }
             }
         };
 
-        thread.start();
+        hiloWeb.start();
         
-        return true;
+        return errorAbriendoWeb;
     }
 
-    public static String getDIRECCION() {
+    public static String getDIRECCIONWEB() {
         return DIRECCION;
     }
 }
