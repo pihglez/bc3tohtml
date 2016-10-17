@@ -378,6 +378,7 @@ Exception in thread "main" java.lang.NullPointerException
 	at org.ph.bc3tohtml.Bc3tohtml.main(Bc3tohtml.java:59)
 
 La cuestión es que se ha presupuesto de manera errónea que los archivos de entrada
-iban a tener extensión bc3 por lo que se genera un puntero a null cuando resulta,
+iban a tener extensión bc3 (y estar bien formados) por lo que se genera un puntero a 
+null cuando resulta,
 como es el caso que no se da esta circunstancia. -> arreglar
 */
