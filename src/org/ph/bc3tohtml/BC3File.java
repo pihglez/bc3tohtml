@@ -95,7 +95,7 @@ public class BC3File {
                 String lineaLeida;      // almacenamiento de la línea leída
                 int numLineaLeida = 0;  // Número de línea leída
                 
-                // primero averiguamos la codificación del archivo a no ser que se fuerce codificación Cp1252
+                //<editor-fold defaultstate="collapsed" desc="primero averiguamos la codificación del archivo a no ser que se fuerce codificación Cp1252">
                 String codificacion;
                 if (!LineaComandos.forzarCodificacionWindows) {
                     InputStreamReader isr = new InputStreamReader(new FileInputStream(bc3FileToProcess));
@@ -108,6 +108,7 @@ public class BC3File {
                     if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Forzando lectura de archivo BC3 en '" + codificacion + "'");
                     if (LineaComandos.modoVerbose) System.out.println("Codificación forzada: " + codificacion);
                 }
+                //</editor-fold>
                 
                 BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream (bc3FileToProcess), codificacion));
                 // BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(fileName), "Cp1252"));
@@ -116,6 +117,9 @@ public class BC3File {
                 StringBuilder sb    = new StringBuilder();
                 
                 // <editor-fold defaultstate="expanded" desc=" Almacenamiento de datos provenientes del formato BC3 ">
+                // se puede optimizar el uso de memoria y la eficiencia de proceso realizando
+                // la declaración en el caso de que el archivo sea verdaderamente
+                // un archivo bc3 procesable
                 rCodigos        = new ArrayList<Registro_C_concepto>();
                 rDescompuestos  = new ArrayList<Registro_D_descomposicion>();
                 rTextos         = new ArrayList<Registro_T_texto>();
@@ -127,7 +131,7 @@ public class BC3File {
                 
                 if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Variables de almacenamiento establecidas.");
                 
-                t0 = System.nanoTime();
+                t0 = System.nanoTime(); // establecemos t0 para medir el tiempo que se tarda en procesar el archivo
                 
                 if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Iniciando la lectura...");
                 
@@ -152,7 +156,6 @@ public class BC3File {
                     
                     if (procesar) {
                         String[] datosLinea;
-//                        if (String.valueOf(sb.charAt(sb.length() - 1)).equals(ConstantesTexto.separador)) sb.append(" ");   // Propósito de prueba
                         datosLinea = sb.toString().split(ConstantesTexto.separador);
                         
                         // <editor-fold defaultstate="expanded" desc=" switch de proceso de cabecera de línea ">
@@ -683,7 +686,7 @@ public class BC3File {
         boolean allOk = false;
         int codNum; // 0: raíz; 1: capítulo; 2: partida/auxiliar/elemental
         double medicion, precio, importe;
-        Element nuevaFilaDatos, dato;
+        Element nuevaFilaDatos, dato, filaCapitulos, capitulo, nuevoBotonCapitulo;
         
         medicion    = getMedicionTotalDeCodigo(codigoConcepto);
         precio      = getPrecioDeCodigo(codigoConcepto);
@@ -699,10 +702,24 @@ public class BC3File {
                 medicion,
                 precio,
                 importe);
+        // A partir de aquí, se debería implementar la inclusión, como UL en el HTML
+        // el listado de todos los capítulos, comenzando por 3 de sus letras...
+        // Esto último puede ser una implementación de manejo de texto potente... ;-)
+        // id="btn-pres-c01", id="btn-pres-c02", id="btn-pres-c03", etc.
         codNum = (concepto.getCodigo().endsWith("##")) ? 0 :    // raíz
                  (concepto.getCodigo().endsWith("#"))  ? 1 : 2; // 1: capítulo; 2: partida/auxiliar/elemental
         
         if ((LineaComandos.generarResumen && codNum < 2) || LineaComandos.generarPresupuesto) {
+            // ids:
+            // "div-menu-horizontal"
+            //      "btn-pres"
+            filaCapitulos = archivoHtml.getElementById("div-menu-horizontal");
+            capitulo = archivoHtml.getElementById("btn-pres");
+            filaCapitulos.appendChild(capitulo.clone());
+            nuevoBotonCapitulo = archivoHtml.getElementById("btn-pres").lastElementSibling();
+            // continuar con la codificación... :-P
+            
+            
             cuerpoTabla.appendChild(filaDatos.clone());
 
             nuevaFilaDatos = archivoHtml.getElementById("filadatos").lastElementSibling();

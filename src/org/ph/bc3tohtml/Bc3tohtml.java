@@ -240,6 +240,8 @@ public class Bc3tohtml {
      * línea de comandos introducidos por el usuario.
      */
     private static void procesarArchivo() {
+        // ver por qué se/ da el error que se está dando cuando se pretende procesar un archivo
+        // cuya extensión no es bc3
         try {
             // el archivo de entrada debe existir y ser accesible
             if (!(FileManage.isFileAvailable(LineaComandos.nombreArchivoAProcesar))) {
@@ -295,7 +297,7 @@ public class Bc3tohtml {
      */
     private static void procesarArchivo (String nombreArchivo) {
         // Error en determinados casos... p.e. cuando se introducen dos argumentos: uno el nombre de archivo y otro "-y"
-        // a estudiar
+        // a estudiar y arreglar
         LineaComandos.nombreArchivoAProcesar        = (FileManage.isFileAvailable(nombreArchivo)) ? nombreArchivo : null;
         String archivoSalida                        = FileManage.getNameFromBase(LineaComandos.nombreArchivoAProcesar, "html");
         LineaComandos.nombreArchivoSalida           = (!FileManage.isFileAvailable(archivoSalida) || 
@@ -363,3 +365,19 @@ public class Bc3tohtml {
         }
     }
 }
+
+/*
+~ $ java -jar ./dist/bc3tohtml.jar cenzano.html
+Error: El nombre del archivo salida no es utilizable.
+Exception in thread "main" java.lang.NullPointerException
+	at java.io.File.<init>(File.java:277)
+	at org.ph.System.FileManage.isFileAvailable(FileManage.java:34)
+	at org.ph.bc3tohtml.Bc3tohtml.procesarArchivo(Bc3tohtml.java:251)
+	at org.ph.bc3tohtml.Bc3tohtml.procesarArchivo(Bc3tohtml.java:317)
+	at org.ph.bc3tohtml.Bc3tohtml.testArgs(Bc3tohtml.java:83)
+	at org.ph.bc3tohtml.Bc3tohtml.main(Bc3tohtml.java:59)
+
+La cuestión es que se ha presupuesto de manera errónea que los archivos de entrada
+iban a tener extensión bc3 por lo que se genera un puntero a null cuando resulta,
+como es el caso que no se da esta circunstancia. -> arreglar
+*/

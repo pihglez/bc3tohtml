@@ -46,8 +46,8 @@ public class FileManage {
     
     /**
      * Comprueba si el archivo de nombre 'filename' NO existe y NO es un directorio, en cuyo caso, devuelve true
-     * @param fileName
-     * @return 
+     * @param fileName <code>String</code> El nombre del archivo
+     * @return <code>boolean</code>
      */
     public static boolean fileNameIsUsable (String fileName) {
         File f = new File(fileName);
@@ -58,9 +58,9 @@ public class FileManage {
     /**
      * Método que, a partir del nombre completo de un archivo archivo.extension,
      * devuelve el nuevo nombre completo con la nueva extensión.
-     * @param nombreArchivoBase String El nombre completo utilizado como base.
-     * @param nuevaExtensionArchivo String La extensión que sustituirá la extensión del archivo de base.
-     * @return 
+     * @param nombreArchivoBase <code>String</code> El nombre completo utilizado como base.
+     * @param nuevaExtensionArchivo <code>String</code> La extensión que sustituirá la extensión del archivo de base.
+     * @return <code>String</code> Nombre completo del archivo con la nueva extension
      */
     public static String getNameFromBase(String nombreArchivoBase, String nuevaExtensionArchivo) {
         int n = nombreArchivoBase.lastIndexOf(".");

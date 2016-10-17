@@ -1,0 +1,35 @@
+/*
+ * Copyright (C) 2016 Pedro I. Hernández G. <pihglez@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.ph.stringUtils;
+
+/**
+ *
+ * @author Pedro I. Hernández G. <pihglez@gmail.com>
+ */
+public enum StringChapters {
+    DEMOLICION, DEMOLICIÓN, MOVIMIENTO, TIERRA, CIMIENTO, CONTENCION, CONTENCIÓN, SANEAMIENTO,
+    ESTRUCTURA, HORMIGON, HORMIGÓN, METALICA, METÁLICA, ALBAÑILERIA, ALBAÑILERÍA, CERRAMIENTO, CERRAJERÍA, CERRAJERIA, FACHADA, 
+    CUBIERTA, IMPERMEABILIZACION, IMPERMEABILIZACIÓN, AISLAMIENTO, FALSO, TECHO, PAVIMENTO, 
+    PELDAÑO, ALICATADO, APLACADO, REVESTIMIENTO, FONTANERIA, FONTANERÍA, DESAGÜE, 
+    APARATO, SANITARIO, GRIFERIA, GRIFERÍA, INSTALACION, INSTALACIÓN, GAS, DERIVADO, PETROLEO, PETRÓLEO,
+    ELECTRICIDAD, VENTILACION, VENTILACIÓN, CLIMATIZACION, CLIMATIZACIÓN, EVACUACION, EVACUACIÓN, HUMO,
+    ELEVADOR, ENERGIA, ENERGÍA, SOLAR, CARPINTERIA, CARPINTERÍA, MADERA, ALUMINIO, PVC, ACERO, 
+    PROTECCION, PROTECCIÓN, CONTRA, INCENDIO, PINTURA, ACABADO, URBANIZACION, URBANIZACIÓN, 
+    EQUIPAMIENTO, ZONA, COMUN, DEPORTIVO, URBANO, MARITIMO, MARÍTIMO, SEGURIDAD, SALUD,
+    ENSAYO, TELECOMUNICACION, VIDRIO, RAYO, GESTION, GESTIÓN, RESIDUO, REHABILITACION, REHABILITACIÓN,
+    PLAN, CONTROL, CALIDAD, BAJA, TENSIÓN, TENSION, VARIOS
+}

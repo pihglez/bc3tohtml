@@ -23,12 +23,15 @@ import java.util.ArrayList;
  * @author Pedro I. Hernández G. <pihglez@gmail.com>
  */
 public class StrUtils {
+    private static final int LONGITUDRESUMEN = 3;
+    
     /**
      * Aproximación al método split de la clase String que utiliza una variable adicional
      * para poder seleccionar el carácter que delimita la división.
      * @param stringToSplit La cadena a dividir
      * @param div El carácter que divide la cadena en varias partes
-     * @return String[]
+     * @return String[] <code>String Array</code> en el que están almacenadas cada
+     * una de las partes en que se divide la cadena original
      */
     public static String[] split(String stringToSplit, char div){
         String[] returnedArray;
@@ -107,5 +110,19 @@ public class StrUtils {
     public static boolean isNullOrEmpty(String myString)
     {
          return myString == null || "".equals(myString);
+    }
+    
+    /**
+     * Método que devuelve, a partir del nombre de un capítulo, su correspondiente
+     * resumen de tres caracteres alfanuméricos
+     * @param capitulo <code>String</code> La variable de cadena de cuya longitud
+     * se extrae el resumen
+     * @return <code>String</code> con la codificación calculada
+     */
+    public static String get3CharBriefing(String capitulo) {
+        // LONGITUDRESUMEN = 3;
+        String charBriefing = "";
+//        String s = StringChapters.ACABADO.name();
+        return charBriefing;
     }
 }

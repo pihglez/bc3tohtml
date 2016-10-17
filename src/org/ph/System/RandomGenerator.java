@@ -70,7 +70,7 @@ public class RandomGenerator {
     
     /**
      * Genera una cadena alfabética aleatoria de longitud dada (minúsculas)
-     * @param len <b><int></b> La longitud de la cadena a generar
+     * @param len <b>int</b> La longitud de la cadena a generar
      * @return 
      */
     public static String getRandomLowerString( int len ){
