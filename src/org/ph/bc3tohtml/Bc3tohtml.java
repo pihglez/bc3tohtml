@@ -36,7 +36,7 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v.0.5.0.2";
+    public static final String  BC3TOHTMLVERSION    = "v.0.5.1.0";
     /**
      * En esta constante se almacena el nombre original del software
      */
