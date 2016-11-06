@@ -46,6 +46,7 @@ import org.ph.bc3Format.Registro_T_texto;
 import org.ph.bc3Format.Registro_V_prpdad;
 import org.ph.errors.ErrorInFormatException;
 import org.ph.loggerToFile.Bc3ParserLogger;
+import org.ph.stringUtils.StringEnumMappings;
 
 /**
  *
@@ -116,7 +117,7 @@ public class BC3File {
                 
                 StringBuilder sb    = new StringBuilder();
                 
-                // <editor-fold defaultstate="expanded" desc=" Almacenamiento de datos provenientes del formato BC3 ">
+                // <editor-fold defaultstate="collapsed" desc=" Almacenamiento de datos provenientes del formato BC3 ">
                 // se puede optimizar el uso de memoria y la eficiencia de proceso realizando
                 // la declaración en el caso de que el archivo sea verdaderamente
                 // un archivo bc3 procesable
@@ -158,7 +159,7 @@ public class BC3File {
                         String[] datosLinea;
                         datosLinea = sb.toString().split(ConstantesTexto.separador);
                         
-                        // <editor-fold defaultstate="expanded" desc=" switch de proceso de cabecera de línea ">
+                        // <editor-fold defaultstate="collapsed" desc=" switch de proceso de cabecera de línea ">
                         switch (getDecodedBc3Code(datosLinea[0].toUpperCase())) {
                             case 0: // propiedad y version
                                 procesa_V(datosLinea);
@@ -242,7 +243,7 @@ public class BC3File {
             }
         
         
-        // <editor-fold defaultstate="expanded" desc=" lectura del archivo html de plantilla">
+        // <editor-fold defaultstate="collapsed" desc=" lectura del archivo html de plantilla">
             String plantillaHTML;
             if (!LineaComandos.usarPlantillaExterna) {
                 plantillaHTML = "/org/ph/htmlFormat/mainTemplate.html";
@@ -662,13 +663,13 @@ public class BC3File {
         statistics.append("ESTADÍSTICAS:\n");
         statistics.append("El proceso de lectura ha durado ").append(String.format("%2.3f", tt)).append(" ms.\n");
         statistics.append("  Líneas leídas: ").append(numLineaLeida).append(".\n");
-        statistics.append("    ").append(rCodigos.size()).append(" conceptos.\n");
-        statistics.append("    ").append(rDescompuestos.size()).append(" registros de descomposición.\n");
-        statistics.append("    ").append(rMediciones.size()).append(" partidas con mediciones.\n");
-        statistics.append("    ").append(rTextos.size()).append(" campos de texto.\n");
-        statistics.append("    ").append(rPliegos.size()).append(" pliegos.\n");
+        statistics.append("    ").append(rCodigos.size()).append(       " conceptos.\n");
+        statistics.append("    ").append(rDescompuestos.size()).append( " registros de descomposición.\n");
+        statistics.append("    ").append(rMediciones.size()).append(    " partidas con mediciones.\n");
+        statistics.append("    ").append(rTextos.size()).append(        " campos de texto.\n");
+        statistics.append("    ").append(rPliegos.size()).append(       " pliegos.\n");
         statistics.append("    ").append(rInformaGrafica.size()).append(" registros gráficos.\n");
-        statistics.append("    ").append(rEntidades.size()).append(" entidades.");
+        statistics.append("    ").append(rEntidades.size()).append(     " entidades.");
         
         return statistics;
     }
@@ -686,7 +687,7 @@ public class BC3File {
         boolean allOk = false;
         int codNum; // 0: raíz; 1: capítulo; 2: partida/auxiliar/elemental
         double medicion, precio, importe;
-        Element nuevaFilaDatos, dato, filaCapitulos, capitulo, nuevoBotonCapitulo;
+        Element nuevaFilaDatos, dato, filaCapitulos, capitulo, nuevoBotonCapitulo = null;
         
         medicion    = getMedicionTotalDeCodigo(codigoConcepto);
         precio      = getPrecioDeCodigo(codigoConcepto);
@@ -705,7 +706,7 @@ public class BC3File {
         // A partir de aquí, se debería implementar la inclusión, como UL en el HTML
         // el listado de todos los capítulos, comenzando por 3 de sus letras...
         // Esto último puede ser una implementación de manejo de texto potente... ;-)
-        // id="btn-pres-c01", id="btn-pres-c02", id="btn-pres-c03", etc.
+        // chapterId="btn-pres-c01", chapterId="btn-pres-c02", chapterId="btn-pres-c03", etc.
         codNum = (concepto.getCodigo().endsWith("##")) ? 0 :    // raíz
                  (concepto.getCodigo().endsWith("#"))  ? 1 : 2; // 1: capítulo; 2: partida/auxiliar/elemental
         
@@ -713,30 +714,44 @@ public class BC3File {
             // ids:
             // "div-menu-horizontal"
             //      "btn-pres"
-            filaCapitulos = archivoHtml.getElementById("div-menu-horizontal");
-            capitulo = archivoHtml.getElementById("btn-pres");
-            filaCapitulos.appendChild(capitulo.clone());
-            nuevoBotonCapitulo = archivoHtml.getElementById("btn-pres").lastElementSibling();
-            // continuar con la codificación... :-P
-            
+//            String chapterId, href ="";
+            String chapterId   = "btn-pres" + numBucles;
+            String href        = "cap_" + numBucles;
+            StringEnumMappings sem = new StringEnumMappings();
+            if (codNum == 1 && concepto.getResumen().length() > 0) {    // consultar WTD01 más abajo
+                filaCapitulos = archivoHtml.getElementById("div-menu-horizontal");
+                capitulo = archivoHtml.getElementById("btn-pres");
+                filaCapitulos.appendChild(capitulo.clone());
+                nuevoBotonCapitulo = archivoHtml.getElementById("btn-pres").lastElementSibling();    
+                nuevoBotonCapitulo.attr("id", chapterId);
+                nuevoBotonCapitulo.attr("href", "#" + href);
+//                nuevoBotonCapitulo.appendText(href);
+                // continuar con la codificación... :-P
+            }
             
             cuerpoTabla.appendChild(filaDatos.clone());
 
             nuevaFilaDatos = archivoHtml.getElementById("filadatos").lastElementSibling();
+            if ((codNum == 1)) nuevaFilaDatos.attr("id", href);
             dato = nuevaFilaDatos.getElementById("codigo_0");
 
             codHtml = getHtmlBasedOnCodigo(codNum, concepto.getCodigo());
             dato.append(codHtml);
 
-            dato = nuevaFilaDatos.getElementById("ud_0");
+            dato    = nuevaFilaDatos.getElementById("ud_0");
             codHtml = getHtmlBasedOnCodigo(codNum, concepto.getUnidad());
             dato.append(codHtml);
 
-            dato = nuevaFilaDatos.getElementById("resumen_0");
-            textoLargo = (codNum == 2) ? getTextoDeCodigo(concepto.getCodigo()) : ""; // aquí se puede dar la opción de visualizar el texto de los capítulos en caso de existir
-            codHtml = "<b>" + getHtmlBasedOnCodigo(codNum, concepto.getResumen()) + "</b>" + 
-                    ((textoLargo.length() > 0) ? "<br/>" : "") +
-                    textoLargo;
+            dato        = nuevaFilaDatos.getElementById("resumen_0");
+            textoLargo  = (codNum == 2) ? getTextoDeCodigo(concepto.getCodigo()) : ""; // aquí se puede dar la opción de visualizar el texto de los capítulos en caso de existir
+            codHtml     = "<b>" + getHtmlBasedOnCodigo(codNum, concepto.getResumen()) + "</b>" + 
+                          ((textoLargo.length() > 0) ? "<br/>" : "") +
+                          textoLargo;
+            if ((codNum == 1 && concepto.getResumen().length() > 0)) {  // WTD01: esta condición tiene que ser solidaria (igual en ambas líneas) 
+                                                                        //siempre hasta que se recodifique esta sección para su optimización
+                nuevoBotonCapitulo.attr("title", concepto.getResumen());
+                nuevoBotonCapitulo.text(sem.getResumedChapter(concepto.getResumen()));
+            }
             dato.append(codHtml);
 
 
@@ -768,11 +783,12 @@ public class BC3File {
     /**
      * Devuelve el código HTML empleado para enfatizar el código raíz, los
      * capítulos y otros aspectos del archivo html exportado
-     * @param tipoCodigo 0: raíz; 1: capítulo; 2: partida/auxiliar/elemental
-     * @param cadena La cadena a formatear en HTML
+     * @param tipoCodigo <code>int</code> 0: raíz; 1: capítulo; 2: partida/auxiliar/elemental
+     * @param cadena <code>String</code> La cadena a formatear en HTML
      * @return 
      */
     private String getHtmlBasedOnCodigo(int tipoCodigo, String cadena) {
+        if (tipoCodigo < 0 || tipoCodigo > 2) return null;
         StringBuilder s = new StringBuilder();
 //        if (!(tipoCodigo > 1)) {
         switch(tipoCodigo) {
@@ -800,8 +816,8 @@ public class BC3File {
      * Este método añade la codificación de capítulo en el caso de que se haya
      * perdido en la descomposición
      * 
-     * @param codigoDescomposicion
-     * @return 
+     * @param codigoDescomposicion <code>String</code>
+     * @return <code>String</code>
      */
     private String getCodigoDescomposicionOk(String codigoDescomposicion) {
         String s = "";

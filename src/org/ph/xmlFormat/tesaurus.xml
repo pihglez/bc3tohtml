@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (C) 2016 Pedro I. HernÓndez G. <pihglez@gmail.com>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<tesaurus version="1.0" timestamp="09:00:00 19/10/2016">
+    <substitutions>
+        <letter base="a">
+            <susbst new="á"/>
+            <susbst new="à"/>
+        </letter>
+        <letter base="e">
+            <susbst new="é"/>
+            <susbst new="è"/>
+            <susbst new="ë"/>
+        </letter>
+        <letter base="i">
+            <susbst new="í"/>
+            <susbst new="ì"/>
+        </letter>
+        <letter base="o">
+            <susbst new="ó"/>
+            <susbst new="ò"/>
+        </letter>
+        <letter base="u">
+            <susbst new="ú"/>
+            <susbst new="ù"/>
+            <susbst new="ü"/>
+        </letter>
+    </substitutions>
+    <couple word="ACABADO"              res="ACA"/>
+    <couple word="ACERO"                res="ACE"/>
+    <couple word="AISLAMIENTO"          res="AIS"/>
+    <couple word="ALBAÑILERIA"          res="ALB"/>
+    <couple word="ALICATADO"            res="ALI"/>
+    <couple word="ALUMINIO"             res="ALU"/>
+    <couple word="APARATO"              res="APA"/>
+    <couple word="APLACADO"             res="APL"/>
+    <couple word="BAJA"                 res="BAJ"/>
+    <couple word="TENSION"              res="TEN"/>
+    <couple word="CARPINTERIA"          res="CAR"/>
+    <couple word="CERRAMIENTO"          res="CER"/>
+    <couple word="CERRAJERIA"           res="CRJ"/>
+    <couple word="CIMIENTO"             res="CIM"/>
+    <couple word="CLIMATIZACION"        res="CLI"/>
+    <couple word="COMUN"                res="COM"/>
+    <couple word="CONTENCION"           res="CON"/>
+    <couple word="CONTRA"               res="COT"/>
+    <couple word="CUBIERTA"             res="CUB"/>
+    <couple word="DEMOLICION"           res="DEM"/>
+    <couple word="DEPORTIVO"            res="DEP"/>
+    <couple word="DERIVADO"             res="DER"/>
+    <couple word="DESAGÜE"              res="DES"/>
+    <couple word="ELECTRICIDAD"         res="ELE"/>
+    <couple word="ENERGIA"              res="ENE"/>
+    <couple word="ENSAYO"               res="ENS"/>
+    <couple word="EQUIPAMIENTO"         res="EQU"/>
+    <couple word="ESTRUCTURA"           res="EST"/>
+    <couple word="EVACUACION"           res="EVA"/>
+    <couple word="FACHADA"              res="FAC"/>
+    <couple word="FALSO"                res="FAL"/>
+    <couple word="FONTANERIA"           res="FON"/>
+    <couple word="GAS"                  res="GAS"/>
+    <couple word="GESTION"              res="GES"/>
+    <couple word="GRIFERIA"             res="GRI"/>
+    <couple word="HORMIGON"             res="HOR"/>
+    <couple word="HUMO"                 res="HUM"/>
+    <couple word="IMPERMEABILIZACION"   res="IMP"/>
+    <couple word="INCENDIO"             res="INC"/>
+    <couple word="INSTALACION"          res="INS"/>
+    <couple word="MADERA"               res="MAD"/>
+    <couple word="MARITIMO"             res="MAR"/>
+    <couple word="METALICA"             res="MET"/>
+    <couple word="MOVIMIENTO"           res="MOV"/>
+    <couple word="PAVIMENTO"            res="PAV"/>
+    <couple word="PELDAÑO"              res="PEL"/>
+    <couple word="PETROLEO"             res="PET"/>
+    <couple word="PINTURA"              res="PIN"/>
+    <couple word="PROTECCION"           res="PRO"/>
+    <couple word="PVC"                  res="PVC"/>
+    <couple word="RAYO"                 res="RAY"/>
+    <couple word="REHABILITACION"       res="REH"/>
+    <couple word="RESIDUO"              res="RES"/>
+    <couple word="REVESTIMIENTO"        res="REV"/>
+    <couple word="SALUD"                res="SAL"/>
+    <couple word="SANEAMIENTO"          res="SAN"/>
+    <couple word="SANITARIO"            res="SNT"/>
+    <couple word="SEGURIDAD"            res="SEG"/>
+    <couple word="SOLAR"                res="SOL"/>
+    <couple word="TECHO"                res="TEC"/>
+    <couple word="TELECOMUNICACION"     res="TEL"/>
+    <couple word="TIERRA"               res="TIE"/>
+    <couple word="URBANIZACION"         res="URB"/>
+    <couple word="URBANO"               res="UBN"/>
+    <couple word="VENTILACION"          res="VEN"/>
+    <couple word="VIDRIO"               res="VID"/>
+    <couple word="ZONA"                 res="ZON"/>
+    <couple word="PLAN"                 res="PLA"/>
+    <couple word="CONTROL"              res="CTL"/>
+    <couple word="CALIDAD"              res="CAL"/>
+    <couple word="VARIOS"               res="VAR"/>
+    <couple word="PRESURIZACION"        res="PRE"/>
+    <couple word="VESTIBULO"            res="VES"/>
+    <couple word="EXTRACCION"           res="EXT"/>
+    <couple word="CAMPANA"              res="CAM"/>
+    <couple word="CUADRO"               res="CUA"/>
+    <couple word="LINEA"                res="LIN"/>
+    <couple word="GENERAL"              res="GEN"/>
+    <couple word="RED"                  res="RED"/>
+    <couple word="HIDRAULICA"           res="HID"/>
+    <couple word="EXTINCION"            res="XTN"/>
+    <couple word="DETECCION"            res="DET"/>
+    <couple word="ALARMA"               res="ALA"/>
+    <couple word="ACCESO"               res="ACC"/>
+    <couple word="SERVICIO"             res="SER"/>
+    <couple word="RADIO"                res="RAD"/>
+    <couple word="TELEVISION"           res="TVI"/>
+    <couple word="TELEFONO"             res="TLF"/>
+    <couple word="PORTERO"              res="POR"/>
+    <couple word="DIGITAL"              res="DIG"/>
+    <couple word="SEÑAL"                res="SEL"/>
+    <couple word="PROVISIONAL"          res="PRV"/>
+    <couple word="MANO"                 res="MAN"/>
+    <couple word="OBRA"                 res="OBR"/>
+    <couple word="GARAJE"               res="GAR"/>
+    <couple word="MEDIDA"               res="MED"/>
+    <couple word="PROTECCION"           res="PRT"/>
+    <couple word="INDIVIDUAL"           res="INL"/>
+    <couple word="COLECTIVA"            res="COL"/>
+    <couple word="INFRAESTRUCTURA"      res="INF"/>
+    <couple word="TERMICA"              res="TRM"/>
+</tesaurus>

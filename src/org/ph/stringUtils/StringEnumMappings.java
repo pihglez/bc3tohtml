@@ -51,12 +51,15 @@ public class StringEnumMappings {
         MAPPINGS.add(StringChapters.CERRAJERIA,         "CRJ");
         MAPPINGS.add(StringChapters.CERRAJERÍA,         "CRJ");
         MAPPINGS.add(StringChapters.CIMIENTO,           "CIM");
+        MAPPINGS.add(StringChapters.CIMENTACION,        "CIM");
         MAPPINGS.add(StringChapters.CLIMATIZACION,      "CLI");
         MAPPINGS.add(StringChapters.CLIMATIZACIÓN,      "CLI");
+        MAPPINGS.add(StringChapters.COLECTIVA,          "COL");
         MAPPINGS.add(StringChapters.COMUN,              "COM");
         MAPPINGS.add(StringChapters.CONTENCION,         "CON");
         MAPPINGS.add(StringChapters.CONTENCIÓN,         "CON");
         MAPPINGS.add(StringChapters.CONTRA,             "COT");
+        MAPPINGS.add(StringChapters.CONTROL,            "CON");
         MAPPINGS.add(StringChapters.CUBIERTA,           "CUB");
         MAPPINGS.add(StringChapters.DEMOLICION,         "DEM");
         MAPPINGS.add(StringChapters.DEMOLICIÓN,         "DEM");
@@ -87,6 +90,7 @@ public class StringEnumMappings {
         MAPPINGS.add(StringChapters.IMPERMEABILIZACION, "IMP");
         MAPPINGS.add(StringChapters.IMPERMEABILIZACIÓN, "IMP");
         MAPPINGS.add(StringChapters.INCENDIO,           "INC");
+        MAPPINGS.add(StringChapters.INFRAESTRUCTURA,    "INF");
         MAPPINGS.add(StringChapters.INSTALACION,        "INS");
         MAPPINGS.add(StringChapters.INSTALACIÓN,        "INS");
         MAPPINGS.add(StringChapters.MADERA,             "MAD");
@@ -124,15 +128,60 @@ public class StringEnumMappings {
         MAPPINGS.add(StringChapters.VIDRIO,             "VID");
         MAPPINGS.add(StringChapters.ZONA,               "ZON");
         MAPPINGS.add(StringChapters.PLAN,               "PLA");
-        MAPPINGS.add(StringChapters.CONTROL,            "CON");
         MAPPINGS.add(StringChapters.CALIDAD,            "CAL");
         MAPPINGS.add(StringChapters.VARIOS,             "VAR");
+        MAPPINGS.add(StringChapters.PRESURIZACION,      "PRE");
+        MAPPINGS.add(StringChapters.PRESURIZACIÓN,      "PRE");
+        MAPPINGS.add(StringChapters.VESTIBULO,          "VES");
+        MAPPINGS.add(StringChapters.VESTÍBULO,          "VES");
+        MAPPINGS.add(StringChapters.EXTRACCION,         "EXT");
+        MAPPINGS.add(StringChapters.EXTRACCIÓN,         "EXT");
+        MAPPINGS.add(StringChapters.CAMPANA,            "CAM");
+        MAPPINGS.add(StringChapters.CUADRO,             "CUA");
+        MAPPINGS.add(StringChapters.LINEA,              "LIN");
+        MAPPINGS.add(StringChapters.LÍNEA,              "LIN");
+        MAPPINGS.add(StringChapters.GENERAL,            "GEN");
+        MAPPINGS.add(StringChapters.RED,                "RED");
+        MAPPINGS.add(StringChapters.HIDRAULICA,         "HID");
+        MAPPINGS.add(StringChapters.EXTINCION,          "XTN");
+        MAPPINGS.add(StringChapters.EXTINCIÓN,          "XTN");
+        MAPPINGS.add(StringChapters.DETECCION,          "DET");
+        MAPPINGS.add(StringChapters.DETECCIÓN,          "DET");
+        MAPPINGS.add(StringChapters.ALARMA,             "ALA");
+        MAPPINGS.add(StringChapters.ACCESO,             "ACC");
+        MAPPINGS.add(StringChapters.SERVICIO,           "SER");
+        MAPPINGS.add(StringChapters.RADIO,              "RAD");
+        MAPPINGS.add(StringChapters.TELEVISION,         "TV" );
+        MAPPINGS.add(StringChapters.TELEVISIÓN,         "TV" );
+        MAPPINGS.add(StringChapters.TELEFONO,           "TLF");
+        MAPPINGS.add(StringChapters.TELÉFONO,           "TLF");
+        MAPPINGS.add(StringChapters.PORTERO,            "POR");
+        MAPPINGS.add(StringChapters.DIGITAL,            "DIG");
+        MAPPINGS.add(StringChapters.SEÑAL,              "SEÑ");
+        MAPPINGS.add(StringChapters.PROVISIONAL,        "PRV");
+        MAPPINGS.add(StringChapters.MANO,               "MAN");
+        MAPPINGS.add(StringChapters.OBRA,               "OBR");
+        MAPPINGS.add(StringChapters.GARAJE,             "GAR");
+        MAPPINGS.add(StringChapters.MEDIDA,             "MED");
+        MAPPINGS.add(StringChapters.PROTECCION,         "PRT");
+        MAPPINGS.add(StringChapters.PROTECCIÓN,         "PRT");
+        MAPPINGS.add(StringChapters.INDIVIDUAL,         "INL");
+        MAPPINGS.add(StringChapters.TERMICA,            "TRM");
+        MAPPINGS.add(StringChapters.TÉRMICA,            "TRM");
         
         numeroElementosIrreconocibles   = 0;
         numeroElementosReconocidos      = 0;
     }
     //</editor-fold>
     
+    /**
+     * Método que a partir de un texto de capítulo, devuelve un código de 3 letras
+     * que simboliza, en función de un tesauro, el acrónimo (o las tres primeras
+     * letras) del capítulo
+     * @param s <code>String</code> El texto largo descriptivo del capítulo
+     * @return <code>String</code> El código de 3 dígitos resumen del texto descriptivo
+     * del capítulo
+     */
     public String getResumedChapter(String s) {
         String toReturn;
 
@@ -151,7 +200,7 @@ public class StringEnumMappings {
             }
         }
         
-        //<editor-fold defaultstate="collapsed" desc="switch de gestión de montaje de acrónimo">
+        //<editor-fold defaultstate="collapsed" desc="switch de gestión de montaje de acrónimos">
         switch (als.size()) {
             case 0:
                 numeroElementosIrreconocibles++;
@@ -183,58 +232,115 @@ public class StringEnumMappings {
         return toReturn;
     }
     
+    /**
+     * Método que devuelve el número de elementos no reconocibles según el tesauro
+     * @return <code>int</code> El número de elementos no reconocibles
+     */
     public int getNumeroElementosIrreconocibles() {
         return numeroElementosIrreconocibles;
     }
     
+    /**
+     * Método que devuelve el número de elementos reconocibles según el tesauro
+     * @return <code>int</code> El número de elementos reconocibles
+     */
     public int getNumeroElementosReconocidos() {
         return numeroElementosReconocidos;
     }
     
+    /**
+     * Una dupla de texto completo y su valor reducido a tres cifras
+     */
     private class enumValor{
         // En realidad, es una pareja del tipo Map<StringChapters, String>
         // que se gestiona mediante ArrayList para mantenerlos ordenados
+        /**
+         * <code>StringChapters</code> asociado al tesauro
+         */
         private final StringChapters    SC;
+        /**
+         * <code>String</code> asociado al <code>Enum</code> definido por <code>SC</code>
+         */
         private final String            S;
         
+        /**
+         * Constructor
+         * @param sc <code></code>  El código según la <code>Enum</code> tesauro <code>StringChapters</code>
+         * @param s <code></code>   El resumen de tres dígitos asociado a <code>sc</code>
+         */
         public enumValor(StringChapters sc, String s){
             this.SC = sc;
             this.S  = s;
         }
         
+        /**
+         * Método que devuelve el <code>StringChapters</code> origen
+         * @return <code>StringChapter</code> de origen
+         */
         public StringChapters getStringChapter() {
-            return SC;
+            return    SC;
         }
         
+        /**
+         * Método que devuelve el <code>String</code> asociado al <code>StringChapters</code>
+         * @return <code>String</code> Cadena de 3 dígitos resumen del correspondiente <code>StringChapters</code>
+         */
         public String getString() {
-            return S;
+            return    S;
         }
     }
     
+    /**
+     * Un ArrayList de <code>enumValor</code> que contiene el conjunto ordenado 
+     * de los datos del tesauro
+     */
     private class Mapp{
 //        private final ArrayList<StringChapters>   sc;
 //        private final ArrayList<String>           s;
         private final ArrayList<enumValor> claves;
         
+        /**
+         * Constructor
+         */
         public Mapp() {
 //            sc  = new ArrayList<StringChapters>();
 //            s   = new ArrayList<String>();
-            claves = new ArrayList<enumValor>();
+            claves  = new ArrayList<enumValor>();
         }
         
+        /**
+         * Método que permite añadir un elemento al mapa de claves entre tesauro
+         * de <code>Enum</code> y clave de tres dígitos <code>String</code>
+         * @param sc <code>StringChapters</code> <code>Enum</code> del tesauro
+         * @param s <code>String</code> Código de tres dígitos correspondiente a la codificación
+         * del resumen del tesauro
+         */
         public void add(StringChapters sc, String s) {
             claves.add(new enumValor(sc,s));
         }
         
+        /**
+         * Método que devuelve <code>StringChapters</code> asociado a un determnado índice
+         * @param index <code>int</code> el índice del elemento que se busca
+         * @return <code>StringChapters</code> asociado a un determnado índice
+         */
         public StringChapters getSCElement(int index) {
-            
             return claves.get(index).getStringChapter();
         }
         
+        /**
+         * Método que devuelve <code>String</code> asociado a un determnado índice
+         * @param index <code>int</code> el índice del elemento que se busca
+         * @return <code>String</code> asociado a un determnado índice
+         */
         public String getStringElement(int index) {
             return claves.get(index).getString();
         }
         
+        /**
+         * Método que devuelve el tamaño del mapa de claves <code>StringChapters</code>-<code>String</code>
+         * @return <code>int</code> El tamaño del almacén de claves
+         */
         public int size() {
             return claves.size();
         }

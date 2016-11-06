@@ -16,6 +16,11 @@
  */
 package org.ph.bc3tohtml;
 
+import java.io.File;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Scanner;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -23,7 +28,10 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.ph.System.FileManage;
+import org.ph.System.MACAddress;
+import org.ph.System.SerialNumber;
 import org.ph.System.SystemProperties;
+import org.ph.xmlFormat.XMLObjectEncoderDecoder;
 import org.ph.bc3tohtml.help.Ayuda;
 import org.ph.errors.ErrorInArgumentsException;
 import org.ph.errors.ErrorInFormatException;
@@ -36,7 +44,7 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v.0.5.1.0";
+    public static final String  BC3TOHTMLVERSION    = "v0.5.1.0";
     /**
      * En esta constante se almacena el nombre original del software
      */
@@ -44,15 +52,13 @@ public class Bc3tohtml {
     /**
      * Opciones de la línea de comandos.
      */
-    private static Options opciones;
+    private static Options      opciones;
 
     /**
      * @param args Argumentos de la línea de comandos
      * @throws org.ph.errors.ErrorInArgumentsException
      */
     public static void main(String[] args) throws ErrorInArgumentsException {
-        
-        
         opciones = new Options();
         setCommandLineOptions();
         
@@ -60,54 +66,130 @@ public class Bc3tohtml {
     }
     
     /**
-     * Método que comprueba los datos introducidos por el usuario en la línea de comandos.
+     * Método que comprueba los datos introducidos por el usuario en la línea de comandos
      * @param args Array en el que cada elemento es un argumento de la línea de comandos introducido por el usuario
      * @throws ErrorInArgumentsException Error irrecuperable en la introducción de comandos por parte del usuario
      */
     private static void testArgs(String[] args) throws ErrorInArgumentsException {
+        // se gestiona la opción oculta (no documentada) de instalar el software 
+        // en el sistema local
+        // esta opción dará la posibilidad de configurar el comportamiento por
+        // defecto de la aplicación en los casos en los que el usuario realice
+        // una ejecución directa, del tipo <bc3tohtml archivo.bc3>
+        boolean installation = false;
         
-        //<editor-fold defaultstate="collapsed" desc="Gestión de la línea de comandos">
-        try {
-            CommandLine cmd = new DefaultParser().parse(opciones, args);
-            LineaComandos.abrirWeb = abrirWeb(cmd);
-            switch (args.length) {
-                case 0:
-                    System.out.println(Ayuda.INFO + Ayuda.DESCRIPCION);
-                    break;
-                case 1:
-                    if (cmd.hasOption("?") || (args.length == 0))   showCmdHelp();
-                    if (cmd.hasOption("i"))                         showSimpleSystemInfo();
-                    if (cmd.hasOption("v"))                         showAppVersion();
-                    if (cmd.hasOption("z"))                         showLicense();
+        if (args.length == 1 && args[0].equals("-install")) {
+            //<editor-fold defaultstate="collapsed" desc="Gestión de instalación">
+            installation = true;
+            
+            String instLocation;
+            SystemProperties sp = new SystemProperties();
+            String dirConfig = sp.getUserRootFolder() + sp.getFileSeparator() + ".config"; // carpeta de usuario/.config (Linux)
+            if(FileManage.folderExists(dirConfig)) {
+                instLocation = dirConfig + sp.getFileSeparator() + "bc3tohtml";
+            } else {
+                instLocation = sp.getUserRootFolder() + sp.getFileSeparator() + ".bc3tohtml";
+            }
+            
+            int c = FileManage.createFolderStructure(instLocation);
+            switch (c) {
+                case -1:    // la localización se crea correctamente
+                            // no se introduce break puesto que se debe continuar
+                            // la ejecución hacia case 0 ;-)
                     
-                    if (argumentIsFileName(args[0]))                procesarArchivo(args[0]);
+                case 0:     // la localización existe
+                    File xmlConfig = new File(instLocation + sp.getFileSeparator() + "bc3tohtml.config.xml");
+                    Bc3ToHtmlConfig config = new Bc3ToHtmlConfig();
+//                    config.setDefaults();
+                    
+                    
+//                    XMLObjectEncoderDecoder.encode(config, xmlConfig);
+                    XMLObjectEncoderDecoder.marshal(config, xmlConfig);
                     break;
-//                case 2:
-//                    // situación en la que, un elemento es el archivo y se considera una única opción adicional
-//                    if (cmd.hasOption("y")) {
-//                        String archivo;
-//                        LineaComandos.asumirRespuestaPositiva = true;
-//                        if(args[0].toLowerCase().contains("y") && args[0].length() == 1 ) {
-//                                archivo = args[1];
-//                        } else  archivo = args[0];
-//                        if (argumentIsFileName(archivo))            procesarArchivo(archivo);
-//                    } else {
-//                        throw new ErrorInArgumentsException("Parece que ha introducido un número incorrecto de argumentos. Por favor, verifique la ayuda.");
-//                    }
+                case 1:     // la localización NO se ha creado ¿ya existe? ¿error?
+                    break;
                 default:
-                    if (args.length > 2) {
-                        gestionaArgumentos(cmd);
-                    } else {
-                        System.out.println(Ayuda.INFO + Ayuda.DESCRIPCION);
-                        System.out.println("Parece que ha introducido un número incorrecto de argumentos. Por favor, verifique la ayuda.");
-                    }
                     break;
             }
-        } catch (ParseException ex) {
-            System.out.println("Error al leer la línea de comandos: " + ex.getLocalizedMessage());
+            
+            
+            if (c == -1) {
+                // la ruta se crea correctamente
+                // aquí, especificar las distintas opciones
+                System.out.println("Instalación realizada correctamente en " + instLocation);
+            }
+            
+            try {
+                String sn = SerialNumber.getSerialNumber();
+                System.out.println("s/n: " + sn);
+                System.out.println("installation location: " + instLocation);
+                try {
+//                    int i = FileManage.createFolderStructure("");
+                    MACAddress mac = new MACAddress();
+                    System.out.println("Dirección mac: " + mac.getMACAddress());
+                    System.out.println("Adaptadores: " + Arrays.toString(mac.getNetworkInterfacesNames().toArray()));
+                    /*
+                    en windows  -> Controla*
+                    en linux    -> eth*
+                    */
+                    System.out.println("              " + mac.getNetworkInterface("lo"));
+                } catch (UnknownHostException ex) {
+                    System.out.println("No host");
+                } catch (SocketException ex) {
+                    System.out.println("No socket");
+                }
+                
+            } catch (NoSuchAlgorithmException ex) {
+                System.out.println("No se ha podido calcular el número de serie.\n" +
+                        ex.getLocalizedMessage());
+            }
+            //</editor-fold>
         }
-        //</editor-fold>
         
+        
+        if (!installation) {
+            //<editor-fold defaultstate="collapsed" desc="Gestión avanzada de la línea de comandos">
+            try {
+                CommandLine cmd = new DefaultParser().parse(opciones, args);
+                LineaComandos.abrirWeb = abrirWeb(cmd);
+                switch (args.length) {
+                    case 0:
+                        System.out.println(Ayuda.INFO + Ayuda.DESCRIPCION);
+                        break;
+                    case 1:
+                        if (cmd.hasOption("?") || (args.length == 0))   showCmdHelp();
+                        if (cmd.hasOption("i"))                         showSimpleSystemInfo();
+                        if (cmd.hasOption("v"))                         showAppVersion();
+                        if (cmd.hasOption("z"))                         showLicense();
+
+                        if (argumentIsFileName(args[0]))                procesarArchivo(args[0]);
+                        break;
+//                    case 2:
+//                        // situación en la que, un elemento es el archivo y se considera una única opción adicional
+//                        if (cmd.hasOption("y")) {
+//                            String archivo;
+//                            LineaComandos.asumirRespuestaPositiva = true;
+//                            if(args[0].toLowerCase().contains("y") && args[0].length() == 1 ) {
+//                                    archivo = args[1];
+//                            } else  archivo = args[0];
+//                            if (argumentIsFileName(archivo))            procesarArchivo(archivo);
+//                        } else {
+//                            throw new ErrorInArgumentsException("Parece que ha introducido un número incorrecto de argumentos. Por favor, verifique la ayuda.");
+//                        }
+                    default:
+                        if (args.length > 2) {
+                            gestionaArgumentos(cmd);
+                        } else {
+                            System.out.println(Ayuda.INFO + Ayuda.DESCRIPCION);
+                            System.out.println("Parece que ha introducido un número incorrecto de argumentos. Por favor, verifique la ayuda.");
+                        }
+                        break;
+                }
+            } catch (ParseException ex) {
+                System.out.println("Error al leer la línea de comandos: " + ex.getLocalizedMessage());
+            }
+            //</editor-fold>
+        }
     }
     
     /**
@@ -179,6 +261,7 @@ public class Bc3tohtml {
         opciones.addOption("i", false,  "Muestra informacion del sistema");                                         // muestra informacion del sistema
         opciones.addOption("c", false,  "Fuerza la lectura de archivos en codificacion Windows\"Cp1252\"");         // fuerza lectura archivo bc3 codificacion Windows Cp1252
         opciones.addOption("noweb", false,  "Evita la apertura del navegador durante la transformacion.");          // evita que la utilizacion del software abra una ventana hacia la web principal del mismo.
+//        opciones.addOption("install", false,  "Realiza la instalación de la aplicación en carpeta local.");         // realiza la instalación de la aplicación en carpeta local.
     }
     
     /**
@@ -187,7 +270,7 @@ public class Bc3tohtml {
     private static void showCmdHelp() {
         HelpFormatter formatter = new HelpFormatter();
         System.out.print(Ayuda.INFO);
-        formatter.printHelp(APPNAME + " " + BC3TOHTMLVERSION, opciones);
+        formatter.printHelp(APPNAME + " " + BC3TOHTMLVERSION, opciones, true);
     }
     
     /**
@@ -276,7 +359,7 @@ public class Bc3tohtml {
                     " --> " + LineaComandos.nombreArchivoSalida);
             
             
-            if (LineaComandos.abrirWeb) WebOficialBc3ToHtml.open();     // el hilo debe informar si la web se abre correctamente y entonces pasa algo en caso contrario
+            if (LineaComandos.abrirWeb) WebOficialBc3ToHtml.open(WebOficialBc3ToHtml.direccion.WEB);     // el hilo debe informar si la web se abre correctamente y entonces pasa algo en caso contrario
             
             BC3File bc3f = new BC3File(LineaComandos.nombreArchivoAProcesar);
             if (bc3f.procesaBC3()) {
@@ -293,7 +376,7 @@ public class Bc3tohtml {
     /**
      * Ejecución en el caso de que el usuario introduzca un único parámetro
      * un único parámetro que debe coincidir con el nombre del archivo a procesar
-     * @param nombreArchivo <strong>String</strong> Nombre del archivo a procesar
+     * @param nombreArchivo <code>String</code> Nombre del archivo a procesar
      */
     private static void procesarArchivo (String nombreArchivo) {
         // Error en determinados casos... p.e. cuando se introducen dos argumentos: uno el nombre de archivo y otro "-y"
@@ -347,8 +430,8 @@ public class Bc3tohtml {
             
             LineaComandos.salidaApresupuestoCiego   = cmd.hasOption("b");
             LineaComandos.salidaSoloDescompuestos   = cmd.hasOption("d");
-            LineaComandos.salidaSoloEntidades     = cmd.hasOption("e");
-            LineaComandos.incluirMediciones       = cmd.hasOption("m");
+            LineaComandos.salidaSoloEntidades       = cmd.hasOption("e");
+            LineaComandos.incluirMediciones         = cmd.hasOption("m");
             LineaComandos.generarResumen            = cmd.hasOption("r");
             LineaComandos.generarPresupuesto        = cmd.hasOption("p");
             

@@ -16,11 +16,14 @@
  */
 package org.ph.bc3tohtml;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Pedro I. Hernández G. <pihglez@gmail.com>
  */
-public class LineaComandos {
+public class LineaComandos implements Serializable {
+    public static final String SERIALVERSIONUUID = Bc3tohtml.BC3TOHTMLVERSION;
     /**
      * Activa la opción de test del software
      */

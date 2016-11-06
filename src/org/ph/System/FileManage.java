@@ -27,7 +27,7 @@ public class FileManage {
     
     /**
      * Comprueba si el archivo de nombre 'filename' puede ser leído, es un archivo, existe y no es un directorio.
-     * @param fileName la ruta completa del archivo
+     * @param fileName <code>String</code> la ruta completa del archivo
      * @return <code>true</code> en el caso de que se cumplan las condiciones y <code>false</code> en caso contrario
      */
     public static boolean isFileAvailable (String fileName) {
@@ -36,8 +36,8 @@ public class FileManage {
     }
     
     /**
-     * Comprueba si el archivo 'file' puede ser leído, es un archivo, existe y no es un directorio.
-     * @param file la referencia al archivo
+     * Comprueba si el archivo <code>file</code> puede ser leído, es un archivo, existe y no es un directorio.
+     * @param file <code>File</code>la referencia al archivo
      * @return <code>true</code> en el caso de que se cumplan las condiciones y <code>false</code> en caso contrario
      */
     public static boolean isFileAvailable (File file) {
@@ -65,5 +65,40 @@ public class FileManage {
     public static String getNameFromBase(String nombreArchivoBase, String nuevaExtensionArchivo) {
         int n = nombreArchivoBase.lastIndexOf(".");
         return nombreArchivoBase.substring(0, n).concat(".").concat(nuevaExtensionArchivo);
+    }
+    
+    /**
+     * Método que comprueba si una ruta en concreto existe y es un directorio/carpeta
+     * @param absolutePath <code>String</code> la ruta completa a comprobar
+     * @return <code>boolean</code> <code>true</code> si la carpeta existe y es una carpeta
+     * (y o un archivo) y <code>false</code> en caso contrario
+     */
+    public static boolean folderExists(String absolutePath) {
+        File f2 = new File(absolutePath);
+        
+        return (f2.exists() && f2.isDirectory());
+    }
+    
+    /**
+     * Método que crea la estructura de carpetas dada por la ruta que se
+     * pasa a partir de un <code>String</code>
+     * @param absolutePath <code>String</code> la ruta completa a crear, con o
+     * sin carpetas anidadas.
+     * @return <code>int</code>  El código que indica como ha ido la operación:<br/>
+     * -1: la ruta se ha creado correctamente<br/>
+     * -0: la ruta existe<br/>
+     * +1: la ruta no se ha podido crear
+     */
+    public static int createFolderStructure(String absolutePath) {
+        File f2 = new File(absolutePath);
+        if(f2.exists()){
+            return      -0;
+        } else {
+            if(f2.mkdirs()){
+                return  -1;
+            } else {
+                return  +1;
+            }
+        }
     }
 }
