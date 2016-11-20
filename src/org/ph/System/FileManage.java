@@ -92,11 +92,14 @@ public class FileManage {
     public static int createFolderStructure(String absolutePath) {
         File f2 = new File(absolutePath);
         if(f2.exists()){
+            System.out.println("La ruta ya existe.");
             return      -0;
         } else {
             if(f2.mkdirs()){
+                System.out.println("La ruta se ha creado correctamente.");
                 return  -1;
             } else {
+                System.out.println("La ruta no se ha podido crear.");
                 return  +1;
             }
         }

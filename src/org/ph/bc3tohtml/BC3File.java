@@ -246,6 +246,7 @@ public class BC3File {
         // <editor-fold defaultstate="collapsed" desc=" lectura del archivo html de plantilla">
             String plantillaHTML;
             if (!LineaComandos.usarPlantillaExterna) {
+                // pendiente de implementar
                 plantillaHTML = "/org/ph/htmlFormat/mainTemplate.html";
             } else {
                 System.out.println("Opción de utilización de plantilla externa no implementada. Utilizando plantilla por defecto.");
@@ -301,6 +302,7 @@ public class BC3File {
     private void procesa_K (String[] linea) {
         rCoeficientes = new Registro_K_coeficientes(linea);
         if (LineaComandos.modoVerbose)          System.out.println("Registro de coeficientes procesado.");
+        //<editor-fold defaultstate="collapsed" desc="Descripción de coeficientes en el archivo log">
         if (LineaComandos.mantenerArchivoLog)   {
             log.appendTimedLogLine("DN: "       + rCoeficientes.getDN());
             log.appendTimedLogLine("DD: "       + rCoeficientes.getDD());
@@ -333,6 +335,7 @@ public class BC3File {
             log.appendTimedLogLine("DEC: "      + rCoeficientes.getDEC());
             log.appendTimedLogLine("DIVISA2: "  + rCoeficientes.getDIVISA2());
         }
+        //</editor-fold>
     }
     
     /**
@@ -604,7 +607,8 @@ public class BC3File {
             elemento = archivoHtml.getElementById("anchura");   elemento.text("");
             elemento = archivoHtml.getElementById("altura");    elemento.text("");
             elemento = archivoHtml.getElementById("parcial");   elemento.text("");
-            elemento = archivoHtml.getElementById("resumen");   elemento.attr("width", "70%");
+            elemento = archivoHtml.getElementById("resumen");   /*elemento.attr("width", "70%");*/ elemento.attr("colspan", "5");
+            
         }
         
         if (LineaComandos.generarResumen & !LineaComandos.generarPresupuesto) {

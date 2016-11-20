@@ -28,43 +28,43 @@ public class RandomGenerator {
     private static final String A1          = "0123456789";
     private static final String AB          = AUPPER + ALOWER;
     private static final String AB1         = A1 + AB;
-    private static final SecureRandom rnd   = new SecureRandom();
+    private static final SecureRandom RND   = new SecureRandom();
     
     /**
      * Genera una cadena alfanumérica aleatoria de longitud dada (mayúsculas y minúsculas)
-     * @param len <b><int></b> La longitud de la cadena a generar
+     * @param len <b>int</b> La longitud de la cadena a generar
      * @return 
      */
     public static String getRandomAlphaNumericString( int len ){
         StringBuilder sb = new StringBuilder( len );
         for( int i = 0; i < len; i++ ) 
-            sb.append(AB1.charAt(rnd.nextInt(AB1.length())));
+            sb.append(AB1.charAt(RND.nextInt(AB1.length())));
         return sb.toString();
     }
     
     /**
      * Genera una cadena alfabética aleatoria de longitud dada (mayúsculas y minúsculas)
-     * @param len <b><int></b> La longitud de la cadena a generar
+     * @param len <b>int</b> La longitud de la cadena a generar
      * @return 
      */
     public static String getRandomUpperLowerString( int len ){
         StringBuilder sb = new StringBuilder( len );
         
         for( int i = 0; i < len; i++ ) 
-            sb.append(AB.charAt(rnd.nextInt(AB.length())));
+            sb.append(AB.charAt(RND.nextInt(AB.length())));
         return sb.toString();
     }
     
     /**
      * Genera una cadena alfabética aleatoria de longitud dada (mayúsculas)
-     * @param len <b><int></b> La longitud de la cadena a generar
+     * @param len <b>int</b> La longitud de la cadena a generar
      * @return 
      */
     public static String getRandomUpperString( int len ){
         StringBuilder sb = new StringBuilder( len );
         
         for( int i = 0; i < len; i++ ) 
-            sb.append(AUPPER.charAt(rnd.nextInt(AUPPER.length())));
+            sb.append(AUPPER.charAt(RND.nextInt(AUPPER.length())));
         return sb.toString();
     }
     
@@ -77,7 +77,7 @@ public class RandomGenerator {
         StringBuilder sb = new StringBuilder( len );
         
         for( int i = 0; i < len; i++ ) 
-            sb.append(ALOWER.charAt(rnd.nextInt(ALOWER.length())));
+            sb.append(ALOWER.charAt(RND.nextInt(ALOWER.length())));
         return sb.toString();
     }
 }

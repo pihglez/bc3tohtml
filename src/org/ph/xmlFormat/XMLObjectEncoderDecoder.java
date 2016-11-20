@@ -16,14 +16,8 @@
  */
 package org.ph.xmlFormat;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.util.Arrays;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -36,72 +30,39 @@ import javax.xml.bind.Unmarshaller;
 public class XMLObjectEncoderDecoder {
     
     /**
-     * <a href="https://docs.oracle.com/javase/tutorial/javabeans/advanced/persistence.html">
-     * documentación de Oracle acerca de la persistencia</a>
-     * Se serializan todos los campos/atributos salvo los estáticos <code>static</code>
-     * y los transitorios <code>transient</code>
-     * @param o <code>Object</code> Objeto o clase que se quiere serializar en un
-     * archivo XML
-     * @param xmlFile <code>File</code> Archivo en el que se serializa el objeto
-     * <b>o</b>
-     * @return <code>boolean</code> <code>true</code> en el caso de que la codificación del
-     * objeto se haya realizado correctamente y <code>false</code> en caso contrario
+     * Método que serializa un objeto a un archivo en formato XML legible por el
+     * usuario mediante JAXB
+     * @param o <code>Object</code> el objeto a serializar
+     * @param xmlFile <code>File</code> el archivo en el que se serializará el
+     * objeto
+     * @return <code>boolean</code> <b><code>true</code></b> en el caso de que la
+     * serialización se realice adecuadamente y <code>false</code> en caso contrario
      */
-    public static boolean encode (Object o, File xmlFile) {
-        // http://www.oracle.com/technetwork/java/persistence4-140124.html
-        XMLEncoder encoder = null;
-        System.out.println("Escribiendo configuración desde " + o.getClass().getName());
-        try{
-            encoder = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(xmlFile)));
-            encoder.writeObject(o);
-        }catch(FileNotFoundException ex){
-            System.out.println("ERROR: en la creación del archivo XML de configuración " + xmlFile.getName() + "\n" + 
-                    ex.getLocalizedMessage());
-            encoder.close();
-            return false;
-        }
-        
-        encoder.close();
-        
-        return true;
-    }
-    
-    /**
-     * Método que carga un objeto desde un archivo XML
-     * @param xmlFile <code>File</code> El archivo xml que se quiere descodificar
-     * @return <code>Object</code> El objeto que se ha codificado con anterioridad
-     */
-    public static Object decode(File xmlFile) {
-        XMLDecoder decoder = null;
-            try {
-                decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(xmlFile)));
-            } catch (FileNotFoundException ex) {
-                System.out.println("ERROR: no se ha podiduo proceder a la descodificación del archivo " + xmlFile.getName() + "\n" + 
-                    ex.getLocalizedMessage());
-            }
-        return decoder.readObject();
-    }
-    
-    
     public static boolean marshal (Object o, File xmlFile) {
         JAXBContext jaxbContext;
         try {
             jaxbContext = JAXBContext.newInstance(o.getClass());
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true); // formateado e indentado
             jaxbMarshaller.marshal(o, xmlFile);
         } catch (JAXBException ex) {
             System.out.println("ERROR: en la creación del archivo XML de configuración " + xmlFile.getName() + "\n" + 
                     ex.getLocalizedMessage() + "\n" +
-                    ex.getStackTrace());
+                    Arrays.toString(ex.getStackTrace()));
             return false;
         }
         
         return true;
     }
     
-    
+    /**
+     * Método que carga un objeto desde un archivo XML mediante JAXB
+     * @param o <code>Object</code> El tipo de objeto que se va a cargar desde
+     * el archivo XML
+     * @param xmlFile <code>File</code> El archivo XML que se quiere deserializar
+     * @return <code>Object</code> El objeto que se ha codificado con anterioridad
+     */
     public static Object unmarshal (Object o, File xmlFile) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(o.getClass());
@@ -110,7 +71,7 @@ public class XMLObjectEncoderDecoder {
         } catch (JAXBException ex) {
             System.out.println("ERROR: no se ha podiduo proceder a la descodificación del archivo " + xmlFile.getName() + "\n" + 
                     ex.getLocalizedMessage() + "\n" +
-                    ex.getStackTrace());
+                    Arrays.toString(ex.getStackTrace()));
         }
         return null;
     }

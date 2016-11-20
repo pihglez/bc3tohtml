@@ -18,9 +18,13 @@ package org.ph.bc3tohtml;
 
 import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import org.ph.System.SerialNumber;
 
 /**
  *
@@ -34,7 +38,11 @@ import javax.xml.bind.annotation.XmlType;
     "asumirRespuestaPositiva", "generarPresupuesto", "forzarCodificacionWindows",
     "abrirWeb", "nombrePlantillaHtml"})
 public class Bc3ToHtmlConfig implements Serializable {
+    @XmlTransient
+    private static final long serialVersionUID = 1L;
     private String  SERIALVERSIONUUID        ;    // la versión del archivo de configuración
+    private String  SOFTWARESERIALNUMBER     ;    // el número de serie de la versión del software
+    private String  platform                 ;    // la plataforma en la que se ha instalado el software
     private boolean opcionTest               ;    // /te$t
     private boolean mostrarEstadisticas      ;    // -s
     private boolean modoVerbose              ;    // -v
@@ -55,7 +63,9 @@ public class Bc3ToHtmlConfig implements Serializable {
     private boolean abrirWeb                 ;
     
     
-    public Bc3ToHtmlConfig() {setDefaults();} // el constructor debe estar vacío para que sea serializable
+    public Bc3ToHtmlConfig() {
+        setDefaults();
+    }
     
     /**
      * Valores por defecto:<br/>
@@ -78,6 +88,7 @@ public class Bc3ToHtmlConfig implements Serializable {
      */
     public void setDefaults() {
         SERIALVERSIONUUID           = Bc3tohtml.BC3TOHTMLVERSION;
+        SOFTWARESERIALNUMBER        = SerialNumber.getSerialNumber();
         opcionTest                  = false;
         mostrarEstadisticas         = false;
         modoVerbose                 = false;
@@ -252,5 +263,38 @@ public class Bc3ToHtmlConfig implements Serializable {
 
     public void setSERIALVERSIONUUID(String SERIALVERSIONUUID) {
         this.SERIALVERSIONUUID = SERIALVERSIONUUID;
+    }
+
+    @XmlAttribute
+    public String getSOFTWARESERIALNUMBER() {
+        return SOFTWARESERIALNUMBER;
+    }
+    
+    /**
+     * Devuelve el listado de métodos "get..." de la clase
+     * @return <code>String</code> Listado de métodos get de la clase y sus valores en
+     * el momento de la consulta.
+     */
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Métodos de " + this.getClass().getName() + ":\n");
+        for(Method m : Bc3ToHtmlConfig.class.getMethods()) {
+            try {
+                if((m.getName().startsWith("get") || m.getName().startsWith("is")) && !m.getName().equals("getClass")) {
+                    sb.append("     "); sb.append(m.getName()); sb.append(": ");
+                    sb.append(m.invoke(this));
+                    sb.append("\n");
+                }
+            } catch (IllegalAccessException ex) {
+                System.out.println("Error de acceso a la clase: "       + ex.getLocalizedMessage());
+            } catch (IllegalArgumentException ex) {
+                System.out.println("Argumento ilegal: "                 + ex.getLocalizedMessage());
+            } catch (InvocationTargetException ex) {
+                System.out.println("Error de invocación de destino: "   + ex.getLocalizedMessage());
+            }
+        }
+        
+        return sb.toString().substring(0, sb.toString().length() - 1);
     }
 }

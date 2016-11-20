@@ -19,7 +19,6 @@ package org.ph.bc3tohtml;
 import java.io.File;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Scanner;
 import org.apache.commons.cli.CommandLine;
@@ -31,10 +30,10 @@ import org.ph.System.FileManage;
 import org.ph.System.MACAddress;
 import org.ph.System.SerialNumber;
 import org.ph.System.SystemProperties;
-import org.ph.xmlFormat.XMLObjectEncoderDecoder;
 import org.ph.bc3tohtml.help.Ayuda;
 import org.ph.errors.ErrorInArgumentsException;
 import org.ph.errors.ErrorInFormatException;
+import org.ph.xmlFormat.XMLObjectEncoderDecoder;
 
 /**
  *
@@ -44,7 +43,7 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v0.5.1.0";
+    public static final String  BC3TOHTMLVERSION    = "v0.5.1.9";
     /**
      * En esta constante se almacena el nombre original del software
      */
@@ -53,6 +52,11 @@ public class Bc3tohtml {
      * Opciones de la línea de comandos.
      */
     private static Options      opciones;
+    /**
+     * En esta constante <code>String</code> se almacena el nombre por defecto 
+     * del archivo de configuración de la aplicación
+     */
+    private static final String BC3CONFIGFILENAME   = "bc3tohtml.config.xml";
 
     /**
      * @param args Argumentos de la línea de comandos
@@ -67,7 +71,7 @@ public class Bc3tohtml {
     
     /**
      * Método que comprueba los datos introducidos por el usuario en la línea de comandos
-     * @param args Array en el que cada elemento es un argumento de la línea de comandos introducido por el usuario
+     * @param args <code>Array</code> en el que cada elemento es un argumento de la línea de comandos introducido por el usuario
      * @throws ErrorInArgumentsException Error irrecuperable en la introducción de comandos por parte del usuario
      */
     private static void testArgs(String[] args) throws ErrorInArgumentsException {
@@ -78,72 +82,37 @@ public class Bc3tohtml {
         // una ejecución directa, del tipo <bc3tohtml archivo.bc3>
         boolean installation = false;
         
+        // comprobar aquí si la instalación existe (archivo de configuración)
+        String instLocation = getInstallationPath();
+        SystemProperties sp = new SystemProperties();
+        String configFileFullPath = instLocation + sp.getFileSeparator() + BC3CONFIGFILENAME;
+        boolean installationExists = installationExists(configFileFullPath, sp);
+        
+        
         if (args.length == 1 && args[0].equals("-install")) {
-            //<editor-fold defaultstate="collapsed" desc="Gestión de instalación">
             installation = true;
             
-            String instLocation;
-            SystemProperties sp = new SystemProperties();
-            String dirConfig = sp.getUserRootFolder() + sp.getFileSeparator() + ".config"; // carpeta de usuario/.config (Linux)
-            if(FileManage.folderExists(dirConfig)) {
-                instLocation = dirConfig + sp.getFileSeparator() + "bc3tohtml";
-            } else {
-                instLocation = sp.getUserRootFolder() + sp.getFileSeparator() + ".bc3tohtml";
-            }
-            
-            int c = FileManage.createFolderStructure(instLocation);
-            switch (c) {
-                case -1:    // la localización se crea correctamente
-                            // no se introduce break puesto que se debe continuar
-                            // la ejecución hacia case 0 ;-)
-                    
-                case 0:     // la localización existe
-                    File xmlConfig = new File(instLocation + sp.getFileSeparator() + "bc3tohtml.config.xml");
-                    Bc3ToHtmlConfig config = new Bc3ToHtmlConfig();
-//                    config.setDefaults();
-                    
-                    
-//                    XMLObjectEncoderDecoder.encode(config, xmlConfig);
-                    XMLObjectEncoderDecoder.marshal(config, xmlConfig);
-                    break;
-                case 1:     // la localización NO se ha creado ¿ya existe? ¿error?
-                    break;
-                default:
-                    break;
-            }
-            
-            
-            if (c == -1) {
-                // la ruta se crea correctamente
-                // aquí, especificar las distintas opciones
-                System.out.println("Instalación realizada correctamente en " + instLocation);
-            }
-            
-            try {
-                String sn = SerialNumber.getSerialNumber();
-                System.out.println("s/n: " + sn);
-                System.out.println("installation location: " + instLocation);
-                try {
-//                    int i = FileManage.createFolderStructure("");
-                    MACAddress mac = new MACAddress();
-                    System.out.println("Dirección mac: " + mac.getMACAddress());
-                    System.out.println("Adaptadores: " + Arrays.toString(mac.getNetworkInterfacesNames().toArray()));
-                    /*
-                    en windows  -> Controla*
-                    en linux    -> eth*
-                    */
-                    System.out.println("              " + mac.getNetworkInterface("lo"));
-                } catch (UnknownHostException ex) {
-                    System.out.println("No host");
-                } catch (SocketException ex) {
-                    System.out.println("No socket");
+            doInstallation(instLocation, sp);
+        }
+        
+        if(installationExists) {
+            // leer el archivo de instalación
+            if (LineaComandos.modoVerbose) System.out.println("Cargando archivo de configuración desde " + configFileFullPath);
+            Bc3ToHtmlConfig conf = new Bc3ToHtmlConfig();
+            conf = (Bc3ToHtmlConfig) XMLObjectEncoderDecoder.unmarshal(conf, new File(configFileFullPath));
+            if (conf != null) { // puede ser null en el caso de que se haya adulterado
+                                // el archivo de configuración o que... ¿no exista?
+                if (LineaComandos.modoVerbose) {
+                    System.out.println(conf.toString());
                 }
+            } else {
+                // reinstalación
+                System.out.println("El archivo de instalación se ha corrompido. Se procederá "
+                        + "a la reinstalación.");
+                doInstallation(instLocation, sp);
                 
-            } catch (NoSuchAlgorithmException ex) {
-                System.out.println("No se ha podido calcular el número de serie.\n" +
-                        ex.getLocalizedMessage());
             }
-            //</editor-fold>
+//            System.out.println("config de abrir web: " + conf.isAbrirWeb()); // test
         }
         
         
@@ -189,6 +158,69 @@ public class Bc3tohtml {
                 System.out.println("Error al leer la línea de comandos: " + ex.getLocalizedMessage());
             }
             //</editor-fold>
+        }
+    }
+    
+    /**
+     * Método que realiza la instalación según la configuración de la aplicación
+     * @param instLocation <code>String</code> Carpeta de ubicación de la instalación
+     * @param sp <code>SystemProperties</code> Propiedades del sistema
+     */
+    private static void doInstallation(String instLocation, SystemProperties sp) {
+        int c = FileManage.createFolderStructure(instLocation);
+        File xmlConfigFile = new File(instLocation + sp.getFileSeparator() + BC3CONFIGFILENAME);
+        Bc3ToHtmlConfig config;
+        switch (c) {
+            case -1:    // la localización se crea correctamente
+                        // no se introduce break puesto que se debe continuar
+                        // la ejecución hacia case 0 ;-)
+
+            case 0:     // la localización existe (estructura de carpetas)
+                if(xmlConfigFile.exists()) {
+                    if(preguntarUsuarioSiNo("El archivo de configuración ya existe. ¿Desea sobreescribirlo?")) {
+                        config = new Bc3ToHtmlConfig();
+                        XMLObjectEncoderDecoder.marshal(config, xmlConfigFile);
+                        System.out.println("El archivo se ha re-escrito.");
+                    } else {
+                        System.out.println("Se ha conservado el archivo original: " + xmlConfigFile.getAbsolutePath());
+                    }
+                } else {
+                    config = new Bc3ToHtmlConfig();
+                    XMLObjectEncoderDecoder.marshal(config, xmlConfigFile);
+                }
+
+                break;
+            case 1:     // la localización NO se ha creado ¿error?
+                System.out.println("Error DESCONOCIDO durante la instalación.");
+                break;
+            default:
+                break;
+        }
+
+
+        if (c == -1) {
+            // la ruta se crea correctamente
+            // aquí, especificar las distintas opciones
+            System.out.println("Instalación realizada correctamente en " + instLocation);
+        }
+
+        String sn = SerialNumber.getSerialNumber();
+        System.out.println("s/n: " + sn);
+        System.out.println("installation location: " + instLocation);
+        try {
+
+            MACAddress mac = new MACAddress();
+            System.out.println("Dirección mac: " + mac.getMACAddress());
+            System.out.println("Adaptadores: " + Arrays.toString(mac.getNetworkInterfacesNames().toArray()));
+            /*
+            en windows  -> Controla*
+            en linux    -> eth*
+            */
+            System.out.println("              " + mac.getNetworkInterface("lo"));
+        } catch (UnknownHostException ex) {
+            System.out.println("No host");
+        } catch (SocketException ex) {
+            System.out.println("No socket");
         }
     }
     
@@ -359,7 +391,8 @@ public class Bc3tohtml {
                     " --> " + LineaComandos.nombreArchivoSalida);
             
             
-            if (LineaComandos.abrirWeb) WebOficialBc3ToHtml.open(WebOficialBc3ToHtml.direccion.WEB);     // el hilo debe informar si la web se abre correctamente y entonces pasa algo en caso contrario
+            if (LineaComandos.abrirWeb) WebOficialBc3ToHtml.open(WebOficialBc3ToHtml.direccion.WEB);     // implementar: el hilo debe informar si la web se abre 
+                                                                                                         // correctamente y entonces pasa algo en caso contrario
             
             BC3File bc3f = new BC3File(LineaComandos.nombreArchivoAProcesar);
             if (bc3f.procesaBC3()) {
@@ -367,9 +400,9 @@ public class Bc3tohtml {
                 if (LineaComandos.modoVerbose) System.out.println("Archivo de salida: " + LineaComandos.nombreArchivoSalida);
             }
         } catch (ErrorInFormatException ex) { // catch (ErrorInFormatException|ErrorInArgumentsException ex)
-            System.out.println("Error irrecuperable: " + ex.getMessage());
+            System.out.println("Error irrecuperable de fallo de formato: " + ex.getMessage());
         } catch (ErrorInArgumentsException ex) {
-            System.out.println("Error irrecuperable: " + ex.getMessage());
+            System.out.println("Error irrecuperable de error en los argumentos: " + ex.getMessage());
         }
     }
     
@@ -447,6 +480,38 @@ public class Bc3tohtml {
             procesarArchivo();
         }
     }
+    
+    /**
+     * Método que devuelve el nombre de la carpeta (ruta completa) de instalación
+     * del software en el sistema
+     * @return <code>String</code> Carpeta donde se ubica el archivo de configuración
+     * de la aplicación
+     */
+    private static String getInstallationPath() {
+        String instLocation;
+        SystemProperties sp = new SystemProperties();
+        String dirConfig = sp.getUserRootFolder() + sp.getFileSeparator() + ".config"; // carpeta de usuario/.config (Linux)
+        if(FileManage.folderExists(dirConfig)) {
+            instLocation = dirConfig + sp.getFileSeparator() + "bc3tohtml";
+        } else {
+            instLocation = sp.getUserRootFolder() + sp.getFileSeparator() + ".bc3tohtml";
+        }
+        
+        return instLocation;
+    }
+    
+    /**
+     * Método que comprueba si existe el archivo de configuración
+     * @param instLocation <code>String</code> La ruta completa de ubicación del archivo de configuración 
+     * <br/>(ej. <code>/home/jose/.config/bc3tohtml.config.xml</code>)
+     * @param sp <code>SystemProperties</code> Propiedades del sistema
+     * @return <b><code>true</code></b> en caso de que exista y <code>false</code> en los restantes.
+     */
+    public static boolean installationExists(String instLocation, SystemProperties sp){
+        File xmlConfigFile = new File(instLocation);
+        
+        return xmlConfigFile.exists();
+    }
 }
 
 /*
@@ -464,4 +529,47 @@ La cuestión es que se ha presupuesto de manera errónea que los archivos de entra
 iban a tener extensión bc3 (y estar bien formados) por lo que se genera un puntero a 
 null cuando resulta,
 como es el caso que no se da esta circunstancia. -> arreglar
+*/
+
+
+/*
+java -jar ./dist/bc3tohtml.jar
+ERROR: no se ha podiduo proceder a la descodificación del archivo bc3tohtml.config.xml
+elemento inesperado (URI:"", local:"java"). Los elementos esperados son <{}Bc3ToHtmlConfig>
+[com.sun.xml.internal.bind.v2.runtime.unmarshaller.UnmarshallingContext.handleEvent(UnmarshallingContext.java:726), 
+com.sun.xml.internal.bind.v2.runtime.unmarshaller.Loader.reportError(Loader.java:247), 
+com.sun.xml.internal.bind.v2.runtime.unmarshaller.Loader.reportError(Loader.java:242), 
+com.sun.xml.internal.bind.v2.runtime.unmarshaller.Loader.reportUnexpectedChildElement(Loader.java:109), 
+com.sun.xml.internal.bind.v2.runtime.unmarshaller.UnmarshallingContext$DefaultRootLoader.childElement(UnmarshallingContext.java:1131), 
+com.sun.xml.internal.bind.v2.runtime.unmarshaller.UnmarshallingContext._startElement(UnmarshallingContext.java:556), 
+com.sun.xml.internal.bind.v2.runtime.unmarshaller.UnmarshallingContext.startElement(UnmarshallingContext.java:538), 
+com.sun.xml.internal.bind.v2.runtime.unmarshaller.SAXConnector.startElement(SAXConnector.java:153), 
+com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.startElement(AbstractSAXParser.java:509), 
+com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.scanStartElement(XMLNSDocumentScannerImpl.java:380), 
+com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl$NSContentDriver.scanRootElementHook(XMLNSDocumentScannerImpl.java:619), 
+com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$FragmentContentDriver.next(XMLDocumentFragmentScannerImpl.java:3129), 
+com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$PrologDriver.next(XMLDocumentScannerImpl.java:880), 
+com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl.next(XMLDocumentScannerImpl.java:606), 
+com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.next(XMLNSDocumentScannerImpl.java:118), 
+com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanDocument(XMLDocumentFragmentScannerImpl.java:504), 
+com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:848), 
+com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:777), 
+com.sun.org.apache.xerces.internal.parsers.XMLParser.parse(XMLParser.java:141), 
+com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.parse(AbstractSAXParser.java:1213), 
+com.sun.org.apache.xerces.internal.jaxp.SAXParserImpl$JAXPSAXParser.parse(SAXParserImpl.java:643), 
+com.sun.xml.internal.bind.v2.runtime.unmarshaller.UnmarshallerImpl.unmarshal0(UnmarshallerImpl.java:243), 
+com.sun.xml.internal.bind.v2.runtime.unmarshaller.UnmarshallerImpl.unmarshal(UnmarshallerImpl.java:214), 
+javax.xml.bind.helpers.AbstractUnmarshallerImpl.unmarshal(AbstractUnmarshallerImpl.java:157), 
+javax.xml.bind.helpers.AbstractUnmarshallerImpl.unmarshal(AbstractUnmarshallerImpl.java:162), 
+javax.xml.bind.helpers.AbstractUnmarshallerImpl.unmarshal(AbstractUnmarshallerImpl.java:171), 
+javax.xml.bind.helpers.AbstractUnmarshallerImpl.unmarshal(AbstractUnmarshallerImpl.java:189), 
+org.ph.xmlFormat.XMLObjectEncoderDecoder.unmarshal(XMLObjectEncoderDecoder.java:70), 
+org.ph.bc3tohtml.Bc3tohtml.testArgs(Bc3tohtml.java:95), 
+org.ph.bc3tohtml.Bc3tohtml.main(Bc3tohtml.java:69)]
+Exception in thread "main" java.lang.NullPointerException
+	at org.ph.bc3tohtml.Bc3tohtml.testArgs(Bc3tohtml.java:96)
+	at org.ph.bc3tohtml.Bc3tohtml.main(Bc3tohtml.java:69)
+
+La cuestión aquí es que se ha adulterado el archivo XML de configuración y la carga de objetos no se realiza
+correctamente!! -> arreglar!!
 */

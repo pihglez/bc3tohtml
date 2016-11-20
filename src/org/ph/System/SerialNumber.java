@@ -18,6 +18,8 @@ package org.ph.System;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -169,10 +171,16 @@ public class SerialNumber {
      * en formato (hexadecimal) <b>XXXX-XXXXX-XXXX-XXXXX</b>
      * @throws NoSuchAlgorithmException <code>Exception</code> En el caso de que no se encuentre el algoritmo de generación
      */
-    public static String getSerialNumber() throws NoSuchAlgorithmException {
-        return getSN(calculateMD2SH() +
-                     calculateMD5SH() + 
-                     calculateSHA1SH() + 
-                     calculateSHA256SH());
+    public static String getSerialNumber() {
+        try {
+            return getSN(calculateMD2SH() +
+                    calculateMD5SH() +
+                    calculateSHA1SH() +
+                    calculateSHA256SH());
+        } catch (NoSuchAlgorithmException ex) {
+            System.out.println("Error calculando el número de serie: " + 
+                    ex.getLocalizedMessage());
+            return "0000-00000-0000-00000";
+        }
     }
 }
