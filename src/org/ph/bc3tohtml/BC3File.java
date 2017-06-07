@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import org.jsoup.Jsoup;                                 // java >= 1.5
@@ -96,6 +97,7 @@ public class BC3File {
                 String lineaLeida;      // almacenamiento de la línea leída
                 int numLineaLeida = 0;  // Número de línea leída
                 
+                if (LineaComandos.modoVerbose) System.out.println("Tratando de averiguar la codificación de manera automatizada.");
                 //<editor-fold defaultstate="collapsed" desc="primero averiguamos la codificación del archivo a no ser que se fuerce codificación Cp1252">
                 String codificacion;
                 if (!LineaComandos.forzarCodificacionWindows) {
@@ -111,12 +113,14 @@ public class BC3File {
                 }
                 //</editor-fold>
                 
+                if (LineaComandos.modoVerbose) System.out.println("Se ha adoptado la codificación " + codificacion);
                 BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream (bc3FileToProcess), codificacion));
                 // BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(fileName), "Cp1252"));
                 // Alternativas: 850 ("Cp850") DOS | 437 ("Cp437") DOS-US
                 
                 StringBuilder sb    = new StringBuilder();
                 
+                if (LineaComandos.modoVerbose) System.out.println("Creando variables para almacenar registros.");
                 // <editor-fold defaultstate="collapsed" desc=" Almacenamiento de datos provenientes del formato BC3 ">
                 // se puede optimizar el uso de memoria y la eficiencia de proceso realizando
                 // la declaración en el caso de que el archivo sea verdaderamente
@@ -137,6 +141,13 @@ public class BC3File {
                 if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Iniciando la lectura...");
                 
                 // <editor-fold defaultstate="expanded" desc=" Lectura línea a línea del archivo BC3 "> // http://wiki.netbeans.org/SurroundWithCodeFolding
+                if (LineaComandos.modoVerbose) System.out.println("Iniciando lectura del archivo...");
+                
+                // variables de apoyo para saber si se da (o ha dado) el dato en modo verbose o no
+                boolean showC, showD, showE, showG, showK, showL, showM, showT, showV;
+                showC = false; showD = false; showE = false; showG = false; showK = false;
+                showL = false; showM = false; showT = false; showV = false;
+                
                 while ((lineaLeida = br.readLine()) != null) {
                     // realmente el separador de conceptos en el formato BC3 es el carácter '~' (ASCII 126)
                     numLineaLeida++;
@@ -162,15 +173,19 @@ public class BC3File {
                         // <editor-fold defaultstate="collapsed" desc=" switch de proceso de cabecera de línea ">
                         switch (getDecodedBc3Code(datosLinea[0].toUpperCase())) {
                             case 0: // propiedad y version
+                                if (LineaComandos.modoVerbose & !showV) {showV = true; System.out.println("Procesando propiedad y versión");}
                                 procesa_V(datosLinea);
                                 break;
                             case 1: // coeficientes
+                                if (LineaComandos.modoVerbose & !showK) {showK = true; System.out.println("Procesando coeficientes");}
                                 procesa_K(datosLinea);
                                 break;
                             case 2: // concepto
+                                if (LineaComandos.modoVerbose & !showC) {showC = true; System.out.println("Procesando conceptos");}
                                 procesa_C(datosLinea);
                                 break;
                             case 3: // descomposición
+                                if (LineaComandos.modoVerbose & !showD) {showD = true; System.out.println("Procesando descomposiciones");}
                                 procesa_D(datosLinea);
                                 break;
                             case 4: // añadir descomposición
@@ -178,11 +193,13 @@ public class BC3File {
                             case 5: // descomposición de residuos
                                 break;
                             case 6: // texto
+                                if (LineaComandos.modoVerbose & !showT) {showT = true; System.out.println("Procesando textos");}
                                 procesa_T(datosLinea);
                                 break;
                             case 7: // paramétrica
                                 break;
                             case 8: // pliegos
+                                if (LineaComandos.modoVerbose & !showL) {showL = true; System.out.println("Procesando pliegos");}
                                 procesa_L(datosLinea);
                                 break;
                             case 9: // pliegos (modelo 2)
@@ -192,9 +209,11 @@ public class BC3File {
                             case 11: // ámbito geográfico
                                 break;
                             case 12: // información gráfica
+                                if (LineaComandos.modoVerbose & !showG) {showG = true; System.out.println("Procesando gráficos");}
                                 procesa_G(datosLinea);
                                 break;
                             case 13: // entidad
+                                if (LineaComandos.modoVerbose & !showE) {showE = true; System.out.println("Procesando entidades");}
                                 procesa_E(datosLinea);
                                 break;
                             case 14: // relación comercial
@@ -202,6 +221,7 @@ public class BC3File {
                             case 15: // información técnica
                                 break;
                             case 16: // mediciones
+                                if (LineaComandos.modoVerbose & !showM) {showM = true; System.out.println("Procesando mediciones");}
                                 procesa_M(datosLinea);
                                 break;
                             case 17: // añadir mediciones
@@ -239,7 +259,10 @@ public class BC3File {
             } catch (IOException ex) {
                 System.out.println("El archivo " + bc3FileToProcess + " no se puede leer.");
             } catch (ArrayIndexOutOfBoundsException ex){
-                System.out.println("Se ha producido un error en los límites de la matriz... ¿de cuál? " + ex.getCause().getMessage());
+                if (LineaComandos.modoVerbose) {
+                    System.out.println("Se ha producido un error en los límites de la matriz... Intentando continuar (" 
+                    + ex.getMessage() + ")");
+                }
             }
         
         
@@ -286,7 +309,8 @@ public class BC3File {
         rPropiedad = new Registro_V_prpdad(linea);
         if (LineaComandos.mantenerArchivoLog) log.appendTimedLogLine("Registro de propiedad procesado.");
         if (LineaComandos.modoVerbose) {
-            System.out.println("Datos de propiedad y versión:");
+            System.out.println("Registro de propiedad procesado:");
+            System.out.println("  Datos de propiedad y versión");
             System.out.println("    Propiedad del archivo: "    + rPropiedad.getPROPIEDAD_ARCHIVO());
             System.out.println("    Versión:               "    + rPropiedad.getVERSION_FORMATO());
             System.out.println("    Programa de emisión:   "    + rPropiedad.getPROGRAMA_EMISION());
@@ -301,7 +325,7 @@ public class BC3File {
      */
     private void procesa_K (String[] linea) {
         rCoeficientes = new Registro_K_coeficientes(linea);
-        if (LineaComandos.modoVerbose)          System.out.println("Registro de coeficientes procesado.");
+        if (LineaComandos.modoVerbose)          System.out.println("  Registro de coeficientes procesado.");
         //<editor-fold defaultstate="collapsed" desc="Descripción de coeficientes en el archivo log">
         if (LineaComandos.mantenerArchivoLog)   {
             log.appendTimedLogLine("DN: "       + rCoeficientes.getDN());
@@ -344,6 +368,7 @@ public class BC3File {
      */
     private void procesa_C (String[] linea) {
         try {
+//            if (LineaComandos.modoVerbose) System.out.print("|");
             rCodigos.add(new Registro_C_concepto(linea));
         } catch (ParseException ex) {
             if (LineaComandos.modoVerbose) System.out.println("Error: " + ex.getMessage());
@@ -607,8 +632,10 @@ public class BC3File {
             elemento = archivoHtml.getElementById("anchura");   elemento.text("");
             elemento = archivoHtml.getElementById("altura");    elemento.text("");
             elemento = archivoHtml.getElementById("parcial");   elemento.text("");
-            elemento = archivoHtml.getElementById("resumen");   /*elemento.attr("width", "70%");*/ elemento.attr("colspan", "5");
+            elemento = archivoHtml.getElementById("resumen");   
             
+            /*elemento.attr("width", "70%");*/ 
+            elemento.attr("colspan", "5");
         }
         
         if (LineaComandos.generarResumen & !LineaComandos.generarPresupuesto) {
@@ -679,10 +706,11 @@ public class BC3File {
     }
     
     /**
-     * Implementación preliminar
-     * @param cuerpoTabla
-     * @param filaDatos
-     * @param codigoConcepto
+     * Dada la estructura HTML de la plantilla establecida, se transforma la codificación
+     * BC3 en HTML pre-formateado
+     * @param cuerpoTabla <code>Element</code> El cuerpo principal de la tabla en la que se insertarán los datos
+     * @param filaDatos <code>Element</code> La fila de datos en la que se insertará el concepto definido por <code>codigoConcepto</code>
+     * @param codigoConcepto <code>String</code> El código del concepto que se insertará en el HTML pre-formateado.
      * @return 
      */
     private boolean conceptoAHTML(Element cuerpoTabla, Element filaDatos, String codigoConcepto) {
@@ -690,12 +718,18 @@ public class BC3File {
         
         boolean allOk = false;
         int codNum; // 0: raíz; 1: capítulo; 2: partida/auxiliar/elemental
+        BigDecimal medic , prec , impor ;   // para garantizar la precisión se debe utilizar esta declaración en lugar de 'double' // future release
         double medicion, precio, importe;
         Element nuevaFilaDatos, dato, filaCapitulos, capitulo, nuevoBotonCapitulo = null;
         
         medicion    = getMedicionTotalDeCodigo(codigoConcepto);
         precio      = getPrecioDeCodigo(codigoConcepto);
         importe     = medicion * precio;
+        
+//        medic = BigDecimal.valueOf(2);
+//        prec  = BigDecimal.valueOf(3);
+//        
+//        impor = medic.multiply(prec);
         
         String codHtml, textoLargo;
         
@@ -715,10 +749,6 @@ public class BC3File {
                  (concepto.getCodigo().endsWith("#"))  ? 1 : 2; // 1: capítulo; 2: partida/auxiliar/elemental
         
         if ((LineaComandos.generarResumen && codNum < 2) || LineaComandos.generarPresupuesto) {
-            // ids:
-            // "div-menu-horizontal"
-            //      "btn-pres"
-//            String chapterId, href ="";
             String chapterId   = "btn-pres" + numBucles;
             String href        = "cap_" + numBucles;
             StringEnumMappings sem = new StringEnumMappings();
@@ -757,6 +787,7 @@ public class BC3File {
                 nuevoBotonCapitulo.text(sem.getResumedChapter(concepto.getResumen()));
             }
             dato.append(codHtml);
+            if (!LineaComandos.incluirMediciones) dato.attr("colspan", "5"); // en el caso de que no se incluyan las mediciones, se amplia la columna del resumen
 
 
             dato = nuevaFilaDatos.getElementById("canpres_0");
@@ -777,6 +808,7 @@ public class BC3File {
         al = getCodigosHijos(codigoConcepto);
         if (al != null && (!(LineaComandos.salidaSoloDescompuestos)) && !(codNum > 1)) {
             for (CodigoHijo desc : al) {
+                // recursion
                 conceptoAHTML(cuerpoTabla, filaDatos, getCodigoDescomposicionOk(desc.getCodigoHijo()));
             }
         }

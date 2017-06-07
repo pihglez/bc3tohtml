@@ -28,6 +28,9 @@ import java.util.Date;
  * @author Pedro I. Hernández G. <pihglez@gmail.com>
  */
 public class Bc3ParserLogger {
+    /**
+     * El mecanismo que permite la escritura en el archivo
+     */
     private BufferedWriter      bw;
     
     /**
@@ -36,14 +39,13 @@ public class Bc3ParserLogger {
     private final StringBuilder log;
     
     /**
-     * Número máximo de líneas a guardar en el archivo de manera simultánea
+     * La variable que almacena el número máximo de líneas a escribir simultáneamente
      */
-    private int                 maxLines;
-    
-    /**
-     * Número actual de líneas almacenadas
-     */
-    private int                 actualLines;
+    private int maxLines, 
+            /**
+             * Variable que almacena el número de líneas almacenadas actualmente en memoria
+             */
+            actualLines;
     
     /**
      * Variable que almacena el tiempo medido inicial
@@ -56,19 +58,36 @@ public class Bc3ParserLogger {
     private String              formato;
     
     /**
-     * Constructor de la clase en el que se establece el t0, el <code>StringBuilder</code>
-     * que almacena el log, el formato de almacenamiento del <code>Timestamp</code>,
-     * el número máximo de líneas por defecto a guardar en el archivo y el número
-     * actual de líneas almacenadas en el <code>StringBuilder</code> del log.
+     * Método que establece los valores por defecto de las variables utilizadas:<br/>
+     * <code>formato</code>: El formato en el que se guarda la fecha y hora en el archivo log<br/>
+     * <code>maxLines</code>: El número máximo de líneas que se guardan a la vez (5)<br/>
+     * <code>actualLines</code>: El número actual de líneas almacenadas antes de proceder a su guardad (0)<br/>
+     */
+    private void setDefaults(){
+        formato = "%1$td/%1$tb/%1$tY\t%1$tH:%1$tM:%1$tS.%1$tL\t%2$s\n";
+        maxLines = 5;
+        actualLines = 0;
+    }
+    
+    /**
+     * Constructor por defecto
      */
     public Bc3ParserLogger() {
         t0  = new Date();
         log = new StringBuilder();
-//        formato  = "%-5s %70s%n";
-        formato = "%1$td/%1$tb/%1$tY\t%1$tH:%1$tM:%1$tS.%1$tL\t%2$s\n";
-//        log.append(String.format(formato, t0, "Inicio del proceso de Log."));
-        maxLines = 5;
-        actualLines = 0;
+        setDefaults();
+    }
+    
+    /**
+     * Constructor en el que se adoptan los valores por defecto y se introduce
+     * directamente el nombre del archivo log
+     * @param logFile 
+     */
+    public Bc3ParserLogger(String logFile) {
+        t0  = new Date();
+        log = new StringBuilder();
+        setDefaults();
+        this.setLogFile(logFile);
     }
     
     /**
@@ -99,16 +118,12 @@ public class Bc3ParserLogger {
      */
     public void setLogFile(String file) {
         try {
-            bw = new BufferedWriter(new FileWriter(new File(file)));
+            bw = new BufferedWriter(new FileWriter(new File(file), true)); // true indicates appending instead of a whole new file
         } catch (IOException ex) {
             System.out.println("Error en la apertura del archivo para escritura.");
         }
     }
     
-    /**
-     * Escribe al archivo especificado el log y resetea las variables para mejorar
-     * el comportamiento en memoria de la aplicación
-     */
     private void writeLog() {
         try {
             bw.append(log.toString());
@@ -119,32 +134,11 @@ public class Bc3ParserLogger {
         }
     }
     
-    /**
-     * Método que permite cerrar el archivo abierto para introducir la información
-     * de log.
-     */
-    public void closeFile() {
-    try {
+    public void closeFile() throws IOException {
+        if (actualLines > 0) writeLog();
         bw.close();
-    } catch (IOException ex) {
-        System.out.println("Error en el cierre del archivo de log ");
-    }
     }
     
-    /**
-     * Devuelve el número máximo simultáneo de líneas a guardar en
-     * el archivo log
-     * @return <code>int</code> Número máximo de líneas a guardar
-     */
-    public int getMaxLinesToWrite() {
-        return this.maxLines;
-    }
-    
-    /**
-     * Método que permite establecer el número máximo de líneas que se guardarán
-     * en el archivo log de manera simultánea
-     * @param maxLines <code>int</code> Número máximo de líneas a guardar
-     */
     public void setMaxLinesToWrite(int maxLines) {
         this.maxLines = maxLines;
     }

@@ -43,7 +43,7 @@ public class Bc3tohtml {
     /**
      * En esta constante se almacena la versión actual del software
      */
-    public static final String  BC3TOHTMLVERSION    = "v0.5.1.9";
+    public static final String  BC3TOHTMLVERSION    = "v0.5.2.1";
     /**
      * En esta constante se almacena el nombre original del software
      */
@@ -57,6 +57,11 @@ public class Bc3tohtml {
      * del archivo de configuración de la aplicación
      */
     private static final String BC3CONFIGFILENAME   = "bc3tohtml.config.xml";
+    /**
+     * En esta constante <code>String</code> se almacena el nombre por defecto
+     * del archivo de estadísticas de la aplicación
+     */
+    private static final String BC3STATISTICSFILENAME   = "bc3tohtml.statistics.xml";
 
     /**
      * @param args Argumentos de la línea de comandos
@@ -80,13 +85,17 @@ public class Bc3tohtml {
         // esta opción dará la posibilidad de configurar el comportamiento por
         // defecto de la aplicación en los casos en los que el usuario realice
         // una ejecución directa, del tipo <bc3tohtml archivo.bc3>
-        boolean installation = false;
+        boolean installation            = false;
         
         // comprobar aquí si la instalación existe (archivo de configuración)
-        String instLocation = getInstallationPath();
-        SystemProperties sp = new SystemProperties();
-        String configFileFullPath = instLocation + sp.getFileSeparator() + BC3CONFIGFILENAME;
-        boolean installationExists = installationExists(configFileFullPath, sp);
+        String instLocation             = getInstallationPath();
+        SystemProperties sp             = new SystemProperties();
+        
+        String configFileFullPath       = instLocation + sp.getFileSeparator() + BC3CONFIGFILENAME;
+        String statisticsFileFullPath   = instLocation + sp.getFileSeparator() + BC3STATISTICSFILENAME;
+        
+        boolean installationExists      = installationExists(configFileFullPath, sp);
+        boolean statisticsExists        = installationExists(statisticsFileFullPath, sp);
         
         
         if (args.length == 1 && args[0].equals("-install")) {
@@ -113,6 +122,14 @@ public class Bc3tohtml {
                 
             }
 //            System.out.println("config de abrir web: " + conf.isAbrirWeb()); // test
+        }
+        
+        if(statisticsExists) {
+            // se debe leer el archivo de estadísticas
+            // se debe realizar en hilo aparte... (en teoría)
+            // debería incluirse dentro del if(!installation) -> mover para optimizar!
+        } else {
+            // se debe crear la ruta de almacenamiento del archivo de estadísticas
         }
         
         
@@ -163,12 +180,12 @@ public class Bc3tohtml {
     
     /**
      * Método que realiza la instalación según la configuración de la aplicación
-     * @param instLocation <code>String</code> Carpeta de ubicación de la instalación
+     * @param statisticsLocation <code>String</code> Carpeta de ubicación de la instalación
      * @param sp <code>SystemProperties</code> Propiedades del sistema
      */
-    private static void doInstallation(String instLocation, SystemProperties sp) {
-        int c = FileManage.createFolderStructure(instLocation);
-        File xmlConfigFile = new File(instLocation + sp.getFileSeparator() + BC3CONFIGFILENAME);
+    private static void doInstallation(String statisticsLocation, SystemProperties sp) {
+        int c = FileManage.createFolderStructure(statisticsLocation);
+        File xmlConfigFile = new File(statisticsLocation + sp.getFileSeparator() + BC3CONFIGFILENAME);
         Bc3ToHtmlConfig config;
         switch (c) {
             case -1:    // la localización se crea correctamente
@@ -201,12 +218,12 @@ public class Bc3tohtml {
         if (c == -1) {
             // la ruta se crea correctamente
             // aquí, especificar las distintas opciones
-            System.out.println("Instalación realizada correctamente en " + instLocation);
+            System.out.println("Instalación realizada correctamente en " + statisticsLocation);
         }
 
         String sn = SerialNumber.getSerialNumber();
         System.out.println("s/n: " + sn);
-        System.out.println("installation location: " + instLocation);
+        System.out.println("installation location: " + statisticsLocation);
         try {
 
             MACAddress mac = new MACAddress();
@@ -222,6 +239,27 @@ public class Bc3tohtml {
         } catch (SocketException ex) {
             System.out.println("No socket");
         }
+    }
+    
+    private static void doSaveStatistics(String instLocation, 
+            SystemProperties sp, 
+            Bc3ToHtmlStatistics st) {
+        int c = FileManage.createFolderStructure(instLocation);
+        File xmlStatisticsFile = new File(instLocation + sp.getFileSeparator() + BC3CONFIGFILENAME);
+        
+        Bc3ToHtmlStatistics bc3St = new Bc3ToHtmlStatistics(xmlStatisticsFile);
+        
+        /*
+            CODIFICAR
+        */
+        
+    }
+    
+    private static Bc3ToHtmlStatistics doReadStatistics(String statisticsLocation, 
+            SystemProperties sp) {
+        Bc3ToHtmlStatistics st = new Bc3ToHtmlStatistics(new File(statisticsLocation));
+        
+        return (Bc3ToHtmlStatistics) XMLObjectEncoderDecoder.unmarshal(st, new File(statisticsLocation));
     }
     
     /**
@@ -344,7 +382,10 @@ public class Bc3tohtml {
         boolean figureOutArchive = false;
         if(!opciones.hasOption(argument)) figureOutArchive = true;
         if (figureOutArchive) {
-            if (!(FileManage.isFileAvailable(argument))) figureOutArchive = false;
+            if (!(FileManage.isFileAvailable(argument))) {
+                System.out.println("El archivo \"" + argument + "\" no está disponible. Inténtelo de nuevo.");
+                figureOutArchive = false;
+            }
         }
         return figureOutArchive;
     }
@@ -377,7 +418,7 @@ public class Bc3tohtml {
             // deben establecerse alguno de los argumentos de proceso válidos (-p o -r)
             if (!(  LineaComandos.generarResumen            ||
                     LineaComandos.generarPresupuesto        || 
-                    LineaComandos.salidaSoloDescompuestos   ||
+//                    LineaComandos.salidaSoloDescompuestos   ||
                     LineaComandos.salidaSoloEntidades)) {
                 
                 throw new ErrorInArgumentsException(""
@@ -513,24 +554,6 @@ public class Bc3tohtml {
         return xmlConfigFile.exists();
     }
 }
-
-/*
-~ $ java -jar ./dist/bc3tohtml.jar cenzano.html
-Error: El nombre del archivo salida no es utilizable.
-Exception in thread "main" java.lang.NullPointerException
-	at java.io.File.<init>(File.java:277)
-	at org.ph.System.FileManage.isFileAvailable(FileManage.java:34)
-	at org.ph.bc3tohtml.Bc3tohtml.procesarArchivo(Bc3tohtml.java:251)
-	at org.ph.bc3tohtml.Bc3tohtml.procesarArchivo(Bc3tohtml.java:317)
-	at org.ph.bc3tohtml.Bc3tohtml.testArgs(Bc3tohtml.java:83)
-	at org.ph.bc3tohtml.Bc3tohtml.main(Bc3tohtml.java:59)
-
-La cuestión es que se ha presupuesto de manera errónea que los archivos de entrada
-iban a tener extensión bc3 (y estar bien formados) por lo que se genera un puntero a 
-null cuando resulta,
-como es el caso que no se da esta circunstancia. -> arreglar
-*/
-
 
 /*
 java -jar ./dist/bc3tohtml.jar
